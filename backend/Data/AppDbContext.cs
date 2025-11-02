@@ -1,0 +1,99 @@
+﻿using backend.Model;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json;
+
+namespace backend.Data
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+        public DbSet<Theater> Theaters { get; set; } = null!;
+        public DbSet<Movie> Movies { get; set; } = null!;
+
+        public DbSet<Seat> Seats { get; set; } = null!;
+
+        public DbSet<Showtime> Showtimes { get; set; } = null!;
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Movie>(entity =>
+            {
+                entity.ToTable("movie");
+                entity.Property(e => e.CreatedAt)
+                       .HasColumnName("created_at")
+                       .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedAt)
+                      .HasColumnName("updated_at")
+                      .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+
+                var converter = new ValueConverter<List<string>, string>(
+                    v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
+                    v => string.IsNullOrEmpty(v) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(v, new JsonSerializerOptions())!
+                );
+
+                entity.Property(e => e.genres)
+                      .HasConversion(converter)
+                      .HasColumnType("json");
+
+            });
+
+            modelBuilder.Entity<Seat>(entity =>
+            {
+                entity.ToTable("seat");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.ShowtimeId)
+                      .HasColumnName("showtime_id")
+                      .IsRequired();
+
+                entity.Property(e => e.SeatNumber)
+                      .HasColumnName("seat_number");
+
+                var seatStatusConverter = new ValueConverter<SeatStatus, string>(
+                    v => v.ToString().ToUpperInvariant(),
+                    v => (SeatStatus)Enum.Parse(typeof(SeatStatus), v, true)
+                );
+
+                entity.Property(e => e.Status)
+                      .HasColumnName("status")
+                      .HasConversion(seatStatusConverter)
+                      .IsRequired()
+                      .HasDefaultValueSql("'AVAILABLE'");
+            });
+
+        }
+        private void UpdateTimestamps()
+        {
+            var now = DateTime.UtcNow;
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.Entity is AbstractMappedEntity && (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+            foreach (var entry in entries)
+            {
+                var entity = (AbstractMappedEntity)entry.Entity!;
+                if (entry.State == EntityState.Added)
+                {
+                    entity.CreatedAt = now;
+                }
+                entity.UpdatedAt = now;
+            }
+        }
+        public override int SaveChanges()
+        {
+            UpdateTimestamps();
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            UpdateTimestamps();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+    }
+}

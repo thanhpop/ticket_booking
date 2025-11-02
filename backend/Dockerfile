@@ -1,15 +1,30 @@
-## Start with a base image
+# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM maven:latest AS builder
+# This stage is used when running from VS in fast mode (Default for Debug configuration)
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+USER $APP_UID
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
+
+
+# This stage is used to build the service project
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["backend/backend.csproj", "backend/"]
+RUN dotnet restore "./backend/backend.csproj"
 COPY . .
-RUN mvn clean package -DskipTests
+WORKDIR "/src/backend"
+RUN dotnet build "./backend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# ARG PROJECT_VERSION= 0.0.1
-FROM eclipse-temurin:17-jdk-alpine
+# This stage is used to publish the service project to be copied to the final stage
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./backend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+FROM base AS final
 WORKDIR /app
-
-COPY --from=builder /app/target/backend-0.0.1-SNAPSHOT.jar /app/
-
-EXPOSE 8888
-ENTRYPOINT [ "java", "-jar", "backend-0.0.1-SNAPSHOT.jar" ]
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "backend.dll"]

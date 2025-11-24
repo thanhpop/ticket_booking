@@ -12,7 +12,7 @@ namespace backend.DTO
 
         public string? SeatNumber { get; set; }
 
-        public string Status { get; set; } = "AVAILABLE";
+        public bool IsReserved { get; set; } = false;
 
 
     }

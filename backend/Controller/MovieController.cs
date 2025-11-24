@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using backend.DTO;
 using backend.Helpers;
+using backend.Middleware;
 using backend.Model;
 using backend.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,7 @@ namespace backend.Controllers
             var entities = await _service.GetAllAsync();
             var dtos = _mapper.Map<IEnumerable<MovieDto>>(entities);
             var resp = ApiResponse<IEnumerable<MovieDto>>.Success(dtos);
+
             return Ok(resp);
         }
 

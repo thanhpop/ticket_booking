@@ -36,6 +36,7 @@ namespace backend.Controllers
         {
             var item = await _service.GetByIdAsync(id);
             var dto = _mapper.Map<TheaterDto>(item);
+
             return Ok(ApiResponse<TheaterDto>.Success(dto));
         }
         [HttpGet("search")]

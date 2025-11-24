@@ -1,4 +1,6 @@
-﻿namespace backend.Helpers
+﻿using backend.DTO;
+
+namespace backend.Helpers
 {
     public class ApiResponse<T>
     {
@@ -20,5 +22,6 @@
 
         public static ApiResponse<T> Fail(string message, int code = 400)
             => new ApiResponse<T>(code, message, default);
+
     }
 }

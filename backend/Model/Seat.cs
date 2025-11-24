@@ -16,9 +16,18 @@ namespace backend.Model
         [Column("seat_number")]
         public string? SeatNumber { get; set; }
 
-        [Column("status")]
-        public SeatStatus Status { get; set; } = SeatStatus.AVAILABLE;
+        [Column("is_reserved")]
+        public bool IsReserved { get; set; } = false;
 
+        [Column("reservation_id")]
+        public long? ReservationId { get; set; }
+
+
+        [ForeignKey("ReservationId")]
+        public Reservation? Reservation { get; set; }
+
+        [ForeignKey("ShowtimeId")]
+        public Showtime? Showtime { get; set; }
 
     }
 }

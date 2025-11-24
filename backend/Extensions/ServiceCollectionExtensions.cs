@@ -1,4 +1,6 @@
-﻿using backend.Service.Interfaces;
+﻿using backend.Service.Implementations;
+using backend.Service.Interfaces;
+using backend.Service.Vnpay;
 using backend.Services.Implementations;
 using backend.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +15,11 @@ namespace backend.Extensions
             services.AddScoped<IMovieService, MovieService>();
             services.AddScoped<ISeatService, SeatService>();
             services.AddScoped<IShowtimeService, ShowtimeService>();
-
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IVnPayService, VnPayService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IReservationService, ReservationService>();
             return services;
         }
     }

@@ -20,6 +20,14 @@ namespace backend.Controllers
             _logger = logger;
         }
 
+        // GET api/showtimes/{id}
+        [HttpGet("{id:long}")]
+        public async Task<IActionResult> GetById(long id)
+        {
+            var item = await _service.GetByIdAsync(id);
+            return Ok(ApiResponse<ShowtimeDto>.Success(item));
+        }
+
         [HttpGet("movie/{movieId:long}")]
         public async Task<IActionResult> GetByMovie(long movieId)
         {
@@ -32,14 +40,6 @@ namespace backend.Controllers
         {
             var items = await _service.GetByTheaterAsync(theaterId);
             return Ok(ApiResponse<IEnumerable<ShowtimeDto>>.Success(items));
-        }
-
-        // GET api/showtimes/{id}
-        [HttpGet("{id:long}")]
-        public async Task<IActionResult> Get(long id)
-        {
-            var item = await _service.GetByIdAsync(id);
-            return Ok(ApiResponse<ShowtimeDto>.Success(item));
         }
         [HttpGet("date")]
         public async Task<IActionResult> GetByDate([FromQuery] DateTime date)
@@ -69,7 +69,7 @@ namespace backend.Controllers
         public async Task<IActionResult> Create([FromBody] ShowtimeDto dto)
         {
               var created = await _service.CreateAsync(dto);
-              return CreatedAtAction(nameof(Get), new { id = created.Id }, ApiResponse<ShowtimeDto>.Success(created, "Created", 201));
+              return CreatedAtAction(nameof(GetById), new { id = created.Id }, ApiResponse<ShowtimeDto>.Success(created, "Created", 201));
 
 
         }
@@ -80,7 +80,7 @@ namespace backend.Controllers
             if (!ModelState.IsValid) return BadRequest(new ApiResponse<object>(400, "Invalid request", ModelState));
                 var ok = await _service.UpdateAsync(id, dto);
                 if (!ok) return NotFound(new ApiResponse<object>(404, "Showtime not found", null));
-                return NoContent(); // 204
+                return NoContent();
 
 
         }

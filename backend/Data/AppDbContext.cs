@@ -16,6 +16,11 @@ namespace backend.Data
         public DbSet<Seat> Seats { get; set; } = null!;
 
         public DbSet<Showtime> Showtimes { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Reservation> Reservations { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -60,11 +65,23 @@ namespace backend.Data
                     v => (SeatStatus)Enum.Parse(typeof(SeatStatus), v, true)
                 );
 
-                entity.Property(e => e.Status)
-                      .HasColumnName("status")
-                      .HasConversion(seatStatusConverter)
-                      .IsRequired()
-                      .HasDefaultValueSql("'AVAILABLE'");
+                entity.Property(e => e.IsReserved).HasColumnName("is_reserved");
+                entity.Property(e => e.ReservationId).HasColumnName("reservation_id");
+                entity.HasIndex(e => new { e.ShowtimeId, e.SeatNumber })
+                         .IsUnique()
+                        .HasDatabaseName("unique_seat");
+
+            });
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.ToTable("refresh_token");
+                entity.HasIndex(e => e.Token).IsUnique();
+                entity.Property(e => e.Token).HasMaxLength(512).IsRequired();
+                entity.HasOne(e => e.User)
+                      .WithMany() // or .WithMany(u => u.RefreshTokens) if you add collection on User
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
         }

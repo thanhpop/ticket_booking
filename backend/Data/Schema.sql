@@ -6,10 +6,6 @@ CREATE TABLE IF NOT EXISTS users
     username   VARCHAR(255) NOT NULL,
     email      VARCHAR(255) NOT NULL UNIQUE,
     password   VARCHAR(255) NOT NULL,
-    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- --   role_id INT NOT NULL, 
-  --  FOREIGN KEY (role_id) REFERENCES roles(id)
     INDEX idx_email (email),
     INDEX idx_username (username)
 ) ENGINE = InnoDB
@@ -81,3 +77,53 @@ CREATE TABLE IF NOT EXISTS users
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
+
+  CREATE TABLE IF NOT EXISTS refresh_token
+(
+    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id     BIGINT       NOT NULL,
+    token       VARCHAR(512) NOT NULL UNIQUE,
+    expiry_date DATETIME     NOT NULL,
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_refresh FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+
+  CREATE TABLE IF NOT EXISTS roles
+(
+    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name       ENUM ('USER', 'MODERATOR','ADMIN') NOT NULL UNIQUE,
+    created_at DATETIME                           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME                           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_role
+(
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    CONSTRAINT fk_user_role FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_role_user FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+
+  CREATE TABLE IF NOT EXISTS reservations (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL, -- who made the reservation
+    showtime_id BIGINT NOT NULL, -- what movie/theater/time
+    reservation_time TIMESTAMP NOT NULL, -- when they made it
+    status_id INT NOT NULL DEFAULT 1, -- 1=pending, 2=confirmed, 3=cancelled etc
+    total_price DECIMAL(10, 2) NOT NULL, -- sum of all seats
+    paid BOOLEAN NOT NULL DEFAULT FALSE, -- payment status
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (showtime_id) REFERENCES showtimes(id)
+    -- No FK for status_id cuz it's from master_data
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

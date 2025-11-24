@@ -19,7 +19,7 @@ namespace backend.Services.Implementations
         public async Task<IEnumerable<SeatDto>> GetAvailableByShowtimeAsync(long showtimeId)
         {
             var list = await _db.Seats.AsNoTracking()
-                        .Where(s => s.ShowtimeId == showtimeId && s.Status == SeatStatus.AVAILABLE)
+                        .Where(s => s.ShowtimeId == showtimeId && s.IsReserved == false)
                         .OrderBy(s => s.SeatNumber)
                         .ToListAsync();
 
@@ -28,7 +28,7 @@ namespace backend.Services.Implementations
                 Id = s.Id,
                 ShowtimeId = s.ShowtimeId,
                 SeatNumber = s.SeatNumber,
-                Status = s.Status.ToString()
+                IsReserved = s.IsReserved
             });
         }
 
@@ -44,7 +44,7 @@ namespace backend.Services.Implementations
                 Id = s.Id,
                 ShowtimeId = s.ShowtimeId,
                 SeatNumber = s.SeatNumber,
-                Status = s.Status.ToString()
+                IsReserved = s.IsReserved
             });
         }
         public async Task<bool> DeleteByShowtimeAsync(long showtimeId)

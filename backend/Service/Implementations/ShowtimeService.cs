@@ -6,6 +6,8 @@ using backend.Service.Interfaces;
 using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography.X509Certificates;
 
 namespace backend.Services.Implementations
 {
@@ -42,7 +44,7 @@ namespace backend.Services.Implementations
                     Id = se.Id,
                     ShowtimeId = se.ShowtimeId,
                     SeatNumber = se.SeatNumber,
-                    Status = se.Status.ToString()
+                    IsReserved = se.IsReserved
                 }).ToList(),
             };
         }
@@ -50,7 +52,7 @@ namespace backend.Services.Implementations
         public async Task<IEnumerable<ShowtimeDto>> GetByMovieAsync(long movieId)
         {
             var list = await _db.Showtimes.AsNoTracking()
-                            .Where(x => x.MovieId == movieId)
+                            .Where(x => x.MovieId == movieId).Include(x => x.Seats)
                             .OrderBy(x => x.ShowDate).ThenBy(x => x.ShowTime)
                             .ToListAsync();
 
@@ -64,13 +66,20 @@ namespace backend.Services.Implementations
                 Price = s.Price,
                 TotalSeats = s.TotalSeats,
                 AvailableSeats = s.AvailableSeats,
+                Seats = s.Seats?.Select(se => new SeatDto
+                {
+                    Id = se.Id,
+                    ShowtimeId = se.ShowtimeId,
+                    SeatNumber = se.SeatNumber,
+                    IsReserved = se.IsReserved
+                }).ToList(),
             });
         }
 
         public async Task<IEnumerable<ShowtimeDto>> GetByTheaterAsync(long theaterId)
         {
             var list = await _db.Showtimes.AsNoTracking()
-                            .Where(x => x.TheaterId == theaterId)
+                            .Where(x => x.TheaterId == theaterId).Include(x => x.Seats)
                             .OrderBy(x => x.ShowDate).ThenBy(x => x.ShowTime)
                             .ToListAsync();
 
@@ -84,14 +93,22 @@ namespace backend.Services.Implementations
                 Price = s.Price,
                 TotalSeats = s.TotalSeats,
                 AvailableSeats = s.AvailableSeats,
+                Seats = s.Seats?.Select(se => new SeatDto
+                {
+                    Id = se.Id,
+                    ShowtimeId = se.ShowtimeId,
+                    SeatNumber = se.SeatNumber,
+                   IsReserved = se.IsReserved
+                }).ToList(),
             });
         }
+
         public async Task<IEnumerable<ShowtimeDto>> GetShowtimesByDateAsync(DateTime date)
         {
             var targetDate = date.Date;
             var list = await _db.Showtimes
                                 .AsNoTracking()
-                                .Where(s => s.ShowDate == targetDate)
+                                .Where(s => s.ShowDate == targetDate).Include(x => x.Seats)
                                 .OrderBy(s => s.ShowTime)
                                 .ToListAsync();
 
@@ -105,16 +122,14 @@ namespace backend.Services.Implementations
                 Price = s.Price,
                 TotalSeats = s.TotalSeats,
                 AvailableSeats = s.AvailableSeats,
+                Seats = s.Seats?.Select(se => new SeatDto
+                {
+                    Id = se.Id,
+                    ShowtimeId = se.ShowtimeId,
+                    SeatNumber = se.SeatNumber,
+                    IsReserved = se.IsReserved
+                }).ToList(),
             });
-        }
-        public async Task<int?> GetTotalSeatsAsync(long showtimeId)
-        {
-            var totalSeats = await _db.Showtimes
-                .Where(s => s.Id == showtimeId)
-                .Select(s => (int?)s.TotalSeats)
-                .FirstOrDefaultAsync();
-
-            return totalSeats;
         }
 
         public async Task<IEnumerable<ShowtimeDto>> GetAvailableShowtimesAsync(DateTime? fromDate = null)
@@ -123,7 +138,7 @@ namespace backend.Services.Implementations
 
             var list = await _db.Showtimes
                 .AsNoTracking()
-                .Where(s => s.ShowDate >= date && s.AvailableSeats > 0)
+                .Where(s => s.ShowDate >= date && s.AvailableSeats > 0).Include(x => x.Seats)
                 .OrderBy(s => s.ShowDate).ThenBy(s => s.ShowTime)
                 .Select(s => new ShowtimeDto
                 {
@@ -135,6 +150,7 @@ namespace backend.Services.Implementations
                     Price = s.Price,
                     TotalSeats = s.TotalSeats,
                     AvailableSeats = s.AvailableSeats
+
                 })
                 .ToListAsync();
 
@@ -147,7 +163,7 @@ namespace backend.Services.Implementations
 
             var list = await _db.Showtimes
                 .AsNoTracking()
-                .Where(s => s.MovieId == movieId && s.ShowDate >= date && s.AvailableSeats > 0)
+                .Where(s => s.MovieId == movieId && s.ShowDate >= date && s.AvailableSeats > 0).Include(x => x.Seats)
                 .OrderBy(s => s.ShowDate).ThenBy(s => s.ShowTime)
                 .Select(s => new ShowtimeDto
                 {
@@ -158,14 +174,13 @@ namespace backend.Services.Implementations
                     ShowTime = s.ShowTime.ToString(@"hh\:mm"),
                     Price = s.Price,
                     TotalSeats = s.TotalSeats,
-                    AvailableSeats = s.AvailableSeats
+                    AvailableSeats = s.AvailableSeats,
+
                 })
                 .ToListAsync();
 
             return list;
         }
-
-
         public async Task<ShowtimeDto> CreateAsync(ShowtimeDto dto)
         {
             var movieExists = await _db.Movies.AnyAsync(m => m.id == dto.MovieId);
@@ -193,19 +208,23 @@ namespace backend.Services.Implementations
                 ShowTime = time,
                 Price = dto.Price,
                 TotalSeats = dto.TotalSeats,
-                AvailableSeats = dto.TotalSeats 
+                AvailableSeats = dto.TotalSeats,
+                Seats = new List<Seat>()
             };
 
-    
+
+            int totalSeats = dto.TotalSeats;
+            for (int i = 1; i <= totalSeats; i++)
+            {
+                entity.Seats.Add(new Seat
+                {
+                    SeatNumber = $"{(char)('A' + ((i - 1) / 10))}{((i - 1) % 10) + 1}",
+                    IsReserved = false
+                });
+                
+            }
+
             _db.Showtimes.Add(entity);
-            await _db.SaveChangesAsync(); 
-            var createdSeats = await CreateSeatsForShowtimeAsync(entity.Id);
-
-            int createdCount = createdSeats.Count();
-            entity.AvailableSeats = Math.Min(dto.TotalSeats, createdCount);
-            entity.TotalSeats = dto.TotalSeats; 
-
-            _db.Showtimes.Update(entity);
             await _db.SaveChangesAsync();
 
             var result = new ShowtimeDto
@@ -218,80 +237,44 @@ namespace backend.Services.Implementations
                 Price = entity.Price,
                 TotalSeats = entity.TotalSeats,
                 AvailableSeats = entity.AvailableSeats,
-                Seats = createdSeats.ToList(),
+                Seats = entity.Seats?.Select(se => new SeatDto
+                {
+                    Id = se.Id,
+                    ShowtimeId = se.ShowtimeId,
+                    SeatNumber = se.SeatNumber,
+                    IsReserved = se.IsReserved
+                }).ToList(),
             };
 
             return result;
         }
 
-
-        private async Task<List<SeatDto>> CreateSeatsForShowtimeAsync(long showtimeId) {
-            var anyExisting = await _db.Seats.AsNoTracking().AnyAsync(s => s.ShowtimeId == showtimeId);
-            if (anyExisting) { throw new InvalidOperationException($"Seats for showtime {showtimeId} already exist. Remove them first or use a recreate method.");
-            }
-            var totalSeats = await GetTotalSeatsAsync(showtimeId);
-            List<Seat> seats = new List<Seat>();
-            for(int i = 1;i <= totalSeats; i++)
-            {
-                var seat = new Seat
-                {
-                    ShowtimeId = showtimeId,
-                    SeatNumber = $"{(char)('A' + ((i - 1) / 10))}{((i - 1) % 10) + 1}",
-                    Status = SeatStatus.AVAILABLE
-                };
-                seats.Add(seat);
-            }
-
-            await _db.Seats.AddRangeAsync(seats);
-            await _db.SaveChangesAsync();
-            var seatDtos = seats.Select(s => new SeatDto
-            {
-                Id = s.Id,
-                ShowtimeId = s.ShowtimeId,
-                SeatNumber = s.SeatNumber,
-                Status = s.Status.ToString()
-            }).ToList();
-
-            return seatDtos;
-        }
-
-
         public async Task<bool> UpdateAsync(long id, ShowtimeDto dto)
         {
-            await using var tx = await _db.Database.BeginTransactionAsync();
-            try
-            {
+           
                 var existing = await _db.Showtimes
                                         .FirstOrDefaultAsync(s => s.Id == id);
 
-                if (existing == null)
-                {
-                    await tx.RollbackAsync();
-                    return false;
-                }
 
-                var theater = await _db.Theaters.FirstOrDefaultAsync(t => t.id == dto.TheaterId);
-                if (theater == null)
-                {
-                    await tx.RollbackAsync();
-                    throw new KeyNotFoundException($"Theater {dto.TheaterId} not found.");
-                }
+            var theater = await _db.Theaters.FirstOrDefaultAsync(t => t.id == dto.TheaterId);
+            if (theater == null)
+            {
 
-                if (theater.capacity < existing.TotalSeats)
-                {
-                    await tx.RollbackAsync();
-                    throw new ArgumentException($"The target theater capacity ({theater.capacity}) is smaller than current TotalSeats ({existing.TotalSeats}).");
-                }
+                throw new KeyNotFoundException($"Theater {dto.TheaterId} not found.");
+            }
 
-                if (!TimeSpan.TryParseExact(dto.ShowTime, "hh\\:mm", System.Globalization.CultureInfo.InvariantCulture, out var parsedTime))
-                {
-                    if (!TimeSpan.TryParse(dto.ShowTime, out parsedTime))
-                    {
-                        await tx.RollbackAsync();
-                        throw new ArgumentException("ShowTime must be in HH:mm format.");
-                    }
-                }
 
+
+            if (!TimeSpan.TryParseExact(dto.ShowTime, "hh\\:mm", System.Globalization.CultureInfo.InvariantCulture, out var parsedTime))
+            {
+                if (!TimeSpan.TryParse(dto.ShowTime, out parsedTime))
+                {
+
+                    throw new ArgumentException("ShowTime must be in HH:mm format.");
+                }
+            }
+            if (existing != null)
+                {
                 existing.MovieId = dto.MovieId;
                 existing.TheaterId = dto.TheaterId;
                 existing.ShowDate = dto.ShowDate.Date;
@@ -299,43 +282,32 @@ namespace backend.Services.Implementations
                 existing.Price = dto.Price;
 
                 await _db.SaveChangesAsync();
-                await tx.CommitAsync();
                 return true;
-            }
-            catch
-            {
-                await tx.RollbackAsync();
-                throw;
-            }
-        }
-        public async Task<bool> DeleteAsync(long id)
-        {
-    
-            await using var tx = await _db.Database.BeginTransactionAsync();
-            try
-            {
-
-                await _seatService.DeleteByShowtimeAsync(id);
-
-       
-                var entity = await _db.Showtimes.FindAsync(id);
-                if (entity == null)
-                {
-                    await tx.RollbackAsync();
-                    return false;
+                
                 }
 
-                _db.Showtimes.Remove(entity);
-                await _db.SaveChangesAsync();
 
-                await tx.CommitAsync();
-                return true;
-            }
-            catch
-            {
-                await tx.RollbackAsync();
-                throw;
-            }
+
+            return false;
         }
+
+ 
+        public async Task<bool> DeleteAsync(long id)
+        {
+                
+                var entity = await _db.Showtimes.FindAsync(id);
+                if (entity != null)
+                {
+                    await _seatService.DeleteByShowtimeAsync(id);
+                    _db.Showtimes.Remove(entity);
+                    await _db.SaveChangesAsync();
+                    return true;
+                
+                }
+            return false;
+
+        }
+
+
     }
 }

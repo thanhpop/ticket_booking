@@ -3,6 +3,7 @@ using backend.DTO;
 using backend.Helpers;
 using backend.Model;
 using backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
@@ -23,6 +24,8 @@ namespace backend.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "USER,ADMIN")]
+
         public async Task<IActionResult> GetAll()
         {
             var list = await _service.GetAllAsync();
@@ -32,6 +35,7 @@ namespace backend.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Get(long id)
         {
             var item = await _service.GetByIdAsync(id);
@@ -40,6 +44,7 @@ namespace backend.Controllers
             return Ok(ApiResponse<TheaterDto>.Success(dto));
         }
         [HttpGet("search")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> GetByLocation([FromQuery] string location)
         {
             if (string.IsNullOrWhiteSpace(location))
@@ -51,6 +56,7 @@ namespace backend.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Create([FromBody] TheaterDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -62,6 +68,7 @@ namespace backend.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Update(long id, [FromBody] TheaterDto dto)
         {
             var existing = await _service.GetByIdAsync(id);
@@ -73,6 +80,7 @@ namespace backend.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Delete(long id)
         {
             var ok = await _service.DeleteAsync(id);

@@ -21,7 +21,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddAutoMapper(cfg => { },typeof(AutoMappingProfile).Assembly);
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -32,7 +31,6 @@ builder.Services.AddSwaggerGen();
 
 
 
-// JWT config
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = jwtSection.GetValue<string>("Key") ?? throw new InvalidOperationException("Jwt:Key missing");
 var issuer = jwtSection.GetValue<string>("Issuer");
@@ -81,7 +79,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

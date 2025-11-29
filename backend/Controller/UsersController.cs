@@ -39,6 +39,7 @@ namespace backend.Controller
 
 
         [HttpDelete("{id:long}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Delete(long id)
         {
 

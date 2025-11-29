@@ -16,6 +16,12 @@ namespace backend.Model
         [Column("password")]
         public string? password { get; set; }
 
+        [Column("role_id")]
+        [ForeignKey("Role")]
+        public long role_id { get; set; }
+
+        public Role? Role { get; set; }
+
 
     }
 }

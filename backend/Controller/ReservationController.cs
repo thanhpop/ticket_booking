@@ -3,6 +3,7 @@ using backend.Helpers;
 using backend.Model;
 using backend.Service.Implementations;
 using backend.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controller
@@ -18,6 +19,7 @@ namespace backend.Controller
             _service = service;
         }
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.GetAllAsync();
@@ -25,6 +27,7 @@ namespace backend.Controller
         }
 
         [HttpGet("{id:long}")]
+        [Authorize]
         public async Task<IActionResult> GetById(long id)
         {
             var reservation = await _service.GetByIdAsync(id);
@@ -34,6 +37,7 @@ namespace backend.Controller
             return Ok(reservation);
         }
         [HttpPost]
+        [Authorize(Roles = "USER")]
         public async Task<IActionResult> CreateReservation(ReservationRequestDto dto)
         {
 
@@ -43,6 +47,7 @@ namespace backend.Controller
 
         }
         [HttpPut("{id}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> UpdateAsync(long id)
         {
             var existing = await _service.GetByIdAsync(id);
@@ -53,6 +58,7 @@ namespace backend.Controller
             return NoContent();
         }
         [HttpGet("user/{userId:long}")]
+        [Authorize]
         public async Task<IActionResult> GetByUser(long? userId)
         {
             if (userId == null)

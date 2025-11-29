@@ -37,11 +37,16 @@ namespace backend.Service.Implementations
                 throw new ArgumentException("User with the same username or email already exists.");
             }
             var hashed = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+            var defaultRole = await _db.Roles.FirstOrDefaultAsync(r => r.name == "USER");
+            if (defaultRole == null)
+                throw new Exception("Default role 'User' not found");
+
             var user = new User
             {
                 username = username,
                 email = email,
-                password = hashed
+                password = hashed,
+                role_id = defaultRole.id
             };
             _db.Set<User>().Add(user);
             await _db.SaveChangesAsync();
@@ -53,8 +58,8 @@ namespace backend.Service.Implementations
                 return null;
 
             var user = await _db.Set<User>()
-                .Where(u => u.username == dto.Username)
-                .FirstOrDefaultAsync();
+                .Include(u => u.Role)
+        .FirstOrDefaultAsync(u => u.username == dto.Username);
 
             if (user == null) return null;
 
@@ -113,7 +118,9 @@ namespace backend.Service.Implementations
                 return null;
             }
 
-            var user = await _db.Users.FindAsync(refresh.UserId);
+            var user = await _db.Users
+        .Include(u => u.Role)
+        .FirstOrDefaultAsync(u => u.id == refresh.UserId);
             if (user == null)
             {
                 _db.RefreshTokens.Remove(refresh);
@@ -179,7 +186,10 @@ namespace backend.Service.Implementations
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.username ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
+            if (user.Role != null)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, user.Role.name));
+            }
             var expires = DateTime.UtcNow.AddMinutes(expireMinutes);
 
             var jwt = new JwtSecurityToken(

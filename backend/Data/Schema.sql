@@ -124,6 +124,6 @@ CREATE TABLE IF NOT EXISTS user_role
     total_price DECIMAL(10, 2) NOT NULL, -- sum of all seats
     paid BOOLEAN NOT NULL DEFAULT FALSE, -- payment status
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (showtime_id) REFERENCES showtimes(id)
+    FOREIGN KEY (showtime_id) REFERENCES showtime(id)
     -- No FK for status_id cuz it's from master_data
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

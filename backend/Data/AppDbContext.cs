@@ -18,6 +18,8 @@ namespace backend.Data
         public DbSet<Showtime> Showtimes { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
 
+        public DbSet<Role> Roles { get; set; } = null!;
+
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Reservation> Reservations { get; set; } = null!;
 

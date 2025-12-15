@@ -24,7 +24,6 @@ namespace backend.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "USER,ADMIN")]
 
         public async Task<IActionResult> GetAll()
         {
@@ -35,7 +34,7 @@ namespace backend.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "ADMIN")]
+
         public async Task<IActionResult> Get(long id)
         {
             var item = await _service.GetByIdAsync(id);
@@ -44,7 +43,7 @@ namespace backend.Controllers
             return Ok(ApiResponse<TheaterDto>.Success(dto));
         }
         [HttpGet("search")]
-        [Authorize(Roles = "ADMIN")]
+  
         public async Task<IActionResult> GetByLocation([FromQuery] string location)
         {
             if (string.IsNullOrWhiteSpace(location))
@@ -56,7 +55,6 @@ namespace backend.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Create([FromBody] TheaterDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -68,19 +66,18 @@ namespace backend.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Update(long id, [FromBody] TheaterDto dto)
         {
-            var existing = await _service.GetByIdAsync(id);
-            if (existing == null)
+            var updated = await _service.UpdateAsync(id, _mapper.Map<Theater>(dto));
+
+            if (updated == null)
                 return NotFound(ApiResponse<TheaterDto>.Fail("Not found", 404));
-            _mapper.Map(dto, existing);
-            var ok = await _service.UpdateAsync(id, existing);
-            return NoContent();
+
+            var resultDto = _mapper.Map<TheaterDto>(updated);
+            return Ok(ApiResponse<TheaterDto>.Success(resultDto, "Updated successfully"));
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Delete(long id)
         {
             var ok = await _service.DeleteAsync(id);

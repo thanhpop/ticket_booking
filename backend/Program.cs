@@ -29,6 +29,25 @@ builder.Services.AddApplicationServices();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "https://localhost:4200") 
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+               .AllowCredentials();
+    });
+
+
+    options.AddPolicy("AllowAllDev", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
@@ -76,9 +95,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
+
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+app.UseCors("AllowReact");
+
+
+
 app.UseAuthentication();
 app.UseAuthorization();
 

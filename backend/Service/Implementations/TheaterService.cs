@@ -39,17 +39,17 @@ namespace backend.Services.Implementations
             return theater.id;
         }
 
-        public async Task<bool> UpdateAsync(long id, Theater theater)
+        public async Task<Theater?> UpdateAsync(long id, Theater theater)
         {
             var existing = await _db.Theaters.FindAsync(id);
-            if (existing == null) return false;
+            if (existing == null) return null;
 
             existing.name = theater.name;
             existing.location = theater.location;
             existing.capacity = theater.capacity;
 
             await _db.SaveChangesAsync();
-            return true;
+            return existing;
         }
 
         public async Task<bool> DeleteAsync(long id)

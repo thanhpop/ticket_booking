@@ -28,14 +28,14 @@ namespace backend.Model
         public string? language { get; set; }
 
         [Column("release_date")]
-        public DateTime release_date { get; set; }
+        public DateTime releaseDate { get; set; }
 
         [Required]
         [Column("imdb_id")]
-        public required string imdb_id { get; set; }
+        public required string imdbId { get; set; }
         [Required]
         [Column("film_id")]
-        public required string film_id { get; set; }
+        public required string filmId { get; set; }
 
     }
 }

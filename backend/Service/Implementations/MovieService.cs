@@ -28,10 +28,10 @@ namespace backend.Services.Implementations
             return movie.id;
         }
 
-        public async Task<bool> UpdateAsync(long id, Movie movie)
+        public async Task<Movie?> UpdateAsync(long id, Movie movie)
         {
             var existing = await _db.Movies.FindAsync(id);
-            if (existing == null) return false;
+            if (existing == null) return null;
 
             existing.title = movie.title;
             existing.poster = movie.poster;
@@ -39,12 +39,12 @@ namespace backend.Services.Implementations
             existing.genres = movie.genres ?? new List<string>();
             existing.duration = movie.duration;
             existing.language = movie.language;
-            existing.release_date = movie.release_date;
-            existing.imdb_id = movie.imdb_id;
-            existing.film_id = movie.film_id;
+            existing.releaseDate = movie.releaseDate;
+            existing.imdbId = movie.imdbId;
+            existing.filmId = movie.filmId;
 
             await _db.SaveChangesAsync();
-            return true;
+            return existing;
         }
 
         public async Task<bool> DeleteAsync(long id)

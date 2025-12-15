@@ -7,7 +7,7 @@ namespace backend.Service.Interfaces
         Task<IEnumerable<Movie>> GetAllAsync();
         Task<Movie?> GetByIdAsync(long id);
         Task<long> CreateAsync(Movie movie);
-        Task<bool> UpdateAsync(long id, Movie movie);
+        Task<Movie?> UpdateAsync(long id, Movie movie);
         Task<bool> DeleteAsync(long id);
     }
 }

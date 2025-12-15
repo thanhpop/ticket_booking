@@ -62,10 +62,7 @@ namespace backend.Data
                 entity.Property(e => e.SeatNumber)
                       .HasColumnName("seat_number");
 
-                var seatStatusConverter = new ValueConverter<SeatStatus, string>(
-                    v => v.ToString().ToUpperInvariant(),
-                    v => (SeatStatus)Enum.Parse(typeof(SeatStatus), v, true)
-                );
+
 
                 entity.Property(e => e.IsReserved).HasColumnName("is_reserved");
                 entity.Property(e => e.ReservationId).HasColumnName("reservation_id");

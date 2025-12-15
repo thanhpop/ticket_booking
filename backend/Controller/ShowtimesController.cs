@@ -21,8 +21,15 @@ namespace backend.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var list = await _service.GetAllAsync();
+            return Ok(new ApiResponse<object>(200, "Success", list));
+        }
+
         [HttpGet("{id:long}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetById(long id)
         {
             var item = await _service.GetByIdAsync(id);
@@ -30,7 +37,7 @@ namespace backend.Controllers
         }
 
         [HttpGet("movie/{movieId:long}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetByMovie(long movieId)
         {
             var items = await _service.GetByMovieAsync(movieId);
@@ -38,14 +45,14 @@ namespace backend.Controllers
         }
 
         [HttpGet("theater/{theaterId:long}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetByTheater(long theaterId)
         {
             var items = await _service.GetByTheaterAsync(theaterId);
             return Ok(ApiResponse<IEnumerable<ShowtimeDto>>.Success(items));
         }
         [HttpGet("date")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetByDate([FromQuery] DateTime date)
         {
             var items = await _service.GetShowtimesByDateAsync(date);
@@ -53,7 +60,7 @@ namespace backend.Controllers
         }
 
         [HttpGet("available")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetAvailable([FromQuery] DateTime? date)
         {
             var searchDate = (date ?? DateTime.Today).Date;
@@ -63,7 +70,7 @@ namespace backend.Controllers
 
 
         [HttpGet("available/movies/{movieId:long}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetAvailableForMovie([FromRoute] long movieId, [FromQuery] DateTime? date)
         {
             var searchDate = (date ?? DateTime.Today).Date;
@@ -72,7 +79,7 @@ namespace backend.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
+        //[Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Create([FromBody] ShowtimeDto dto)
         {
               var created = await _service.CreateAsync(dto);
@@ -82,18 +89,18 @@ namespace backend.Controllers
         }
 
         [HttpPut("{id:long}")]
-        [Authorize(Roles = "ADMIN")]
+        //[Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Update(long id, [FromBody] ShowtimeDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(new ApiResponse<object>(400, "Invalid request", ModelState));
-                var ok = await _service.UpdateAsync(id, dto);
-                if (!ok) return NotFound(new ApiResponse<object>(404, "Showtime not found", null));
-                return NoContent();
 
+                var updated = await _service.UpdateAsync(id, dto);
+                return Ok(ApiResponse<ShowtimeDto>.Success(updated, "Updated", 200));
+     
 
         }
+
         [HttpDelete("{id:long}")]
-        [Authorize(Roles = "ADMIN")]
+        //[Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Delete(long id)
         {
               var ok = await _service.DeleteAsync(id);

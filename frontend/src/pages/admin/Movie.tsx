@@ -203,6 +203,7 @@ const MoviePage: React.FC = () => {
 
       if (editingId) {
         const updated = await movieService.updateMovie(editingId, payload);
+        console.log("updated from API:", updated);
         dispatch(updateMovie(updated));
         message.success("Cập nhật phim thành công");
       } else {
@@ -477,7 +478,7 @@ const MoviePage: React.FC = () => {
               </Form.Item>
               <div style={{ marginTop: 56 }} />
               <Form.Item label="Poster (URL)" name="poster">
-                <Input placeholder="URL ảnh poster (ví dụ https://...jpg)" />
+                <Input placeholder="URL ảnh poster " />
               </Form.Item>
             </Col>
             <Col span={16}>
@@ -554,11 +555,11 @@ const MoviePage: React.FC = () => {
                 <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </Form.Item>
               <Form.Item label="IMDB ID" name="imdbId">
-                <Input placeholder="Ví dụ: tt5950044 (nếu có)" />
+                <Input placeholder="" />
               </Form.Item>
 
               <Form.Item label="Film ID" name="filmId">
-                <Input placeholder="FilmId từ nguồn (nếu có)" />
+                <Input placeholder="" />
               </Form.Item>
             </Col>
           </Row>

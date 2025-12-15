@@ -4,6 +4,7 @@ namespace backend.Service.Interfaces
 {
     public interface IShowtimeService
     {
+        Task<IEnumerable<ShowtimeDto>> GetAllAsync();
         Task<IEnumerable<ShowtimeDto>> GetByMovieAsync(long movieId);
         Task<IEnumerable<ShowtimeDto>> GetByTheaterAsync(long theaterId);
         Task<ShowtimeDto?> GetByIdAsync(long id);
@@ -14,7 +15,7 @@ namespace backend.Service.Interfaces
         Task<IEnumerable<ShowtimeDto>> GetAvailableShowtimesForMovieAsync(long movieId, DateTime? fromDate = null);
 
         Task<ShowtimeDto> CreateAsync(ShowtimeDto dto);
-        Task<bool> UpdateAsync(long id, ShowtimeDto dto);
+        Task<ShowtimeDto?> UpdateAsync(long id, ShowtimeDto dto);
         Task<bool> DeleteAsync(long id);
     }
 }

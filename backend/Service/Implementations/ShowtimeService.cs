@@ -21,6 +21,38 @@ namespace backend.Services.Implementations
             _db = db;
             _seatService = seatService;
         }
+
+        public async Task<IEnumerable<ShowtimeDto>> GetAllAsync()
+        {
+            var list = await _db.Showtimes
+                                .AsNoTracking()
+                                .Include(s => s.Seats)
+                                .OrderBy(s => s.ShowDate)
+                                .ThenBy(s => s.ShowTime)
+                                .ToListAsync();
+
+            return list.Select(s => new ShowtimeDto
+            {
+                Id = s.Id,
+                MovieId = s.MovieId,
+                TheaterId = s.TheaterId,
+                ShowDate = s.ShowDate,
+                ShowTime = s.ShowTime.ToString(@"hh\:mm"),
+                Price = s.Price,
+                TotalSeats = s.TotalSeats,
+                AvailableSeats = s.AvailableSeats,
+                Seats = s.Seats?.Select(se => new SeatDto
+                {
+                    Id = se.Id,
+                    ShowtimeId = se.ShowtimeId,
+                    SeatNumber = se.SeatNumber,
+                    IsReserved = se.IsReserved
+                }).ToList()
+            });
+        }
+
+
+
         public async Task<ShowtimeDto?> GetByIdAsync(long id)
         {
             var s = await _db.Showtimes.AsNoTracking()
@@ -249,49 +281,62 @@ namespace backend.Services.Implementations
             return result;
         }
 
-        public async Task<bool> UpdateAsync(long id, ShowtimeDto dto)
+        public async Task<ShowtimeDto?> UpdateAsync(long id, ShowtimeDto dto)
         {
-           
-                var existing = await _db.Showtimes
-                                        .FirstOrDefaultAsync(s => s.Id == id);
-
+            var existing = await _db.Showtimes
+                                    .Include(s => s.Seats) // nếu cần trả kèm seats
+                                    .FirstOrDefaultAsync(s => s.Id == id);
 
             var theater = await _db.Theaters.FirstOrDefaultAsync(t => t.id == dto.TheaterId);
             if (theater == null)
             {
-
                 throw new KeyNotFoundException($"Theater {dto.TheaterId} not found.");
             }
-
-
 
             if (!TimeSpan.TryParseExact(dto.ShowTime, "hh\\:mm", System.Globalization.CultureInfo.InvariantCulture, out var parsedTime))
             {
                 if (!TimeSpan.TryParse(dto.ShowTime, out parsedTime))
                 {
-
                     throw new ArgumentException("ShowTime must be in HH:mm format.");
                 }
             }
-            if (existing != null)
+
+            if (existing == null)
+            {
+                return null;
+            }
+
+            existing.MovieId = dto.MovieId;
+            existing.TheaterId = dto.TheaterId;
+            existing.ShowDate = dto.ShowDate.Date;
+            existing.ShowTime = parsedTime;
+            existing.Price = dto.Price;
+
+            await _db.SaveChangesAsync();
+
+            var result = new ShowtimeDto
+            {
+                Id = existing.Id,
+                MovieId = existing.MovieId,
+                TheaterId = existing.TheaterId,
+                ShowDate = existing.ShowDate,
+                ShowTime = existing.ShowTime.ToString(@"hh\:mm"),
+                Price = existing.Price,
+                TotalSeats = existing.TotalSeats,
+                AvailableSeats = existing.AvailableSeats,
+                Seats = existing.Seats?.Select(se => new SeatDto
                 {
-                existing.MovieId = dto.MovieId;
-                existing.TheaterId = dto.TheaterId;
-                existing.ShowDate = dto.ShowDate.Date;
-                existing.ShowTime = parsedTime;
-                existing.Price = dto.Price;
+                    Id = se.Id,
+                    ShowtimeId = se.ShowtimeId,
+                    SeatNumber = se.SeatNumber,
+                    IsReserved = se.IsReserved
+                }).ToList()
+            };
 
-                await _db.SaveChangesAsync();
-                return true;
-                
-                }
-
-
-
-            return false;
+            return result;
         }
 
- 
+
         public async Task<bool> DeleteAsync(long id)
         {
                 

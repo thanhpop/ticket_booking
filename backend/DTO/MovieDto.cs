@@ -24,12 +24,12 @@ namespace backend.DTO
 
         [Required(ErrorMessage = "Release date is required.")]
         [DataType(DataType.Date, ErrorMessage = "Release date must be a valid date.")]
-        public DateTime release_date { get; set; }
+        public DateTime releaseDate { get; set; }
 
         [Required(ErrorMessage = "IMDB id is required.")]
-        public string imdb_id { get; set; } = null!;
+        public string imdbId { get; set; } = null!;
 
         [Required(ErrorMessage = "Film id is required.")]
-        public string film_id { get; set; } = null!;
+        public string filmId { get; set; } = null!;
     }
 }

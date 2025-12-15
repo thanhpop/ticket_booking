@@ -8,7 +8,7 @@ namespace backend.Services.Interfaces
         Task<Theater?> GetByIdAsync(long id);
         Task<IEnumerable<Theater>> GetByLocationAsync(string location);
         Task<long> CreateAsync(Theater theater);
-        Task<bool> UpdateAsync(long id, Theater theater);
+        Task<Theater?> UpdateAsync(long id, Theater theater);
         Task<bool> DeleteAsync(long id);
     }
 }

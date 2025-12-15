@@ -22,7 +22,7 @@ namespace backend.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+
         public async Task<IActionResult> GetAll()
         {
             var entities = await _service.GetAllAsync();
@@ -33,7 +33,6 @@ namespace backend.Controllers
         }
 
         [HttpGet("{id:long}")]
-        [Authorize]
         public async Task<IActionResult> Get(long id)
         {
             var entity = await _service.GetByIdAsync(id);
@@ -43,7 +42,6 @@ namespace backend.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Create([FromBody] MovieDto dto)
         {
             var entity = _mapper.Map<Movie>(dto);
@@ -54,18 +52,18 @@ namespace backend.Controllers
         }
 
         [HttpPut("{id:long}")]
-        [Authorize(Roles = "ADMIN")]
+
         public async Task<IActionResult> Update(long id, [FromBody] MovieDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var entity = _mapper.Map<Movie>(dto);
-            var ok = await _service.UpdateAsync(id, entity);
-            if (!ok) return NotFound();
-            return NoContent();
+            var updatedEntity = await _service.UpdateAsync(id, entity);
+            var resultDto = _mapper.Map<MovieDto>(updatedEntity);
+    
+            return Ok(ApiResponse<MovieDto>.Success(resultDto));
         }
 
         [HttpDelete("{id:long}")]
-        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Delete(long id)
         {
             var ok = await _service.DeleteAsync(id);

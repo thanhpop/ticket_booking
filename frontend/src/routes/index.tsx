@@ -1,26 +1,30 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Login from "../pages/home/Auth.tsx";
+
 import AdminLayout from "../pages/admin/AdminLayout";
 import MoviePage from "../pages/admin/Movie";
-import HomePage from "../pages/home/HomePage.tsx";
-import CinemaHallPage from "../pages/admin/CinemaHallPage.tsx";
-import SeatSelectionPage from "../pages/home/Seat.tsx";
+
 import NotFoundPage from "../pages/error/error_404.tsx";
 import PaymentResult from "../pages/home/PaymentResult.tsx";
-import OrderList from "../pages/admin/OrderList";
+import TheaterPage from "../pages/admin/TheaterPage.tsx";
+import Showtime from "../pages/admin/Showtime.tsx";
+import NewHomePage from "../pages/home/NewHomePage.tsx";
+import NewAuth from "../pages/home/NewAuth.tsx";
+import MovieDetailPage from "../pages/home/MovieDetailPage.tsx";
+import BookingPage from "../pages/home/BookingPage.tsx";
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={<HomePage />} />
-      <Route path="/seat/:id" element={<SeatSelectionPage />} />
+      <Route path="/login" element={<NewAuth />} />
+      <Route path="/" element={<NewHomePage />} />
+      <Route path="/movie/:id" element={<MovieDetailPage />} />
+      <Route path="/booking/:showtimeId" element={<BookingPage />} />
       <Route path="/paymentResult" element={<PaymentResult />} />
       <Route path="/admin" element={<AdminLayout />}>
         <Route path="movie" element={<MoviePage />} />
-        <Route path="cinemahall" element={<CinemaHallPage />} />
-        <Route path="order" element={<OrderList />} />
+        <Route path="theater" element={<TheaterPage />} />
+        <Route path="showtime" element={<Showtime />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

@@ -37,7 +37,7 @@ namespace backend.Controller
             return Ok(reservation);
         }
         [HttpPost]
-        [Authorize(Roles = "USER")]
+
         public async Task<IActionResult> CreateReservation(ReservationRequestDto dto)
         {
 

@@ -47,18 +47,23 @@ function formatReleaseForApi(release?: string): string | undefined {
 }
 
 export const movieService = {
+    
     async getMovies(title?: string): Promise<Movie[]> {
         const params = title ? { title } : undefined;
         const res = await instance.get('/movie', { params },);
-        const list = res.data && res.data.data ? res.data.data : [];
+        const list = res.data.data;
         return list.map(toMovie);
+    },
+    async getMovieById(id: number) {
+        const res = await instance.get(`/movie/${id}`);
+        return toMovie(res.data.data);
     },
 
     async createMovie(payload: Omit<Movie, 'id'>): Promise<Movie> {
         const formatted = formatReleaseForApi(payload.releaseDate);
         const body = { ...payload, releaseDate: formatted ?? payload.releaseDate };
         const res = await instance.post('/movie', body);
-        const movie = res.data && res.data.data ? res.data.data : res.data;
+        const movie = res.data.data ;
         return toMovie(movie);
     },
 
@@ -66,7 +71,7 @@ export const movieService = {
         const formatted = formatReleaseForApi(payload.releaseDate);
         const body = { ...payload, id: Number(id), releaseDate: formatted ?? payload.releaseDate };
         const res = await instance.put(`/movie/${encodeURIComponent(String(id))}`, body);
-        const movie = res.data && res.data.data ? res.data.data : res.data;
+        const movie = res.data.data;
         return toMovie(movie);
     },
 

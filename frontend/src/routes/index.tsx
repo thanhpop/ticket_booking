@@ -6,18 +6,18 @@ import MoviePage from "../pages/admin/Movie";
 
 import NotFoundPage from "../pages/error/error_404.tsx";
 import PaymentResult from "../pages/home/PaymentResult.tsx";
-import TheaterPage from "../pages/admin/TheaterPage.tsx";
+import TheaterPage from "../pages/admin/Theater.tsx";
 import Showtime from "../pages/admin/Showtime.tsx";
-import NewHomePage from "../pages/home/NewHomePage.tsx";
-import NewAuth from "../pages/home/NewAuth.tsx";
-import MovieDetailPage from "../pages/home/MovieDetailPage.tsx";
-import BookingPage from "../pages/home/BookingPage.tsx";
+import HomePage from "../pages/home/Home.tsx";
+import Auth from "../pages/home/Auth.tsx";
+import MovieDetailPage from "../pages/home/MovieDetail.tsx";
+import BookingPage from "../pages/home/Booking.tsx";
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/login" element={<NewAuth />} />
-      <Route path="/" element={<NewHomePage />} />
+      <Route path="/login" element={<Auth />} />
+      <Route path="/" element={<HomePage />} />
       <Route path="/movie/:id" element={<MovieDetailPage />} />
       <Route path="/booking/:showtimeId" element={<BookingPage />} />
       <Route path="/paymentResult" element={<PaymentResult />} />

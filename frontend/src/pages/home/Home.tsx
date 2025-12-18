@@ -1,20 +1,17 @@
 import React, { useState } from "react";
 import { Layout, Button, Carousel, Tabs, Card } from "antd";
-import { PlayCircleOutlined, InfoCircleOutlined } from "@ant-design/icons"; // Đã thêm icon Info
+import { PlayCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import type { TabsProps } from "antd";
-import AppHeader from "../../components/AppHeader"; // Giả định đường dẫn component Header của bạn
+import AppHeader from "../../components/AppHeader";
 import { useNavigate } from "react-router-dom";
 import AppFooter from "../../components/AppFooter";
 
 import { useEffect } from "react";
-import { showtimeService } from "../../services/showtime";
+import { showtimeService } from "../../services/Showtime";
 import movieService from "../../services/Movie";
-import { Spin, Empty } from "antd";
 
 const { Content } = Layout;
 const { Meta } = Card;
-
-// --- DỮ LIỆU GIẢ LẬP (MOCK DATA) ---
 
 interface HomeMovie {
   id: number;
@@ -65,16 +62,13 @@ const banners: BannerData[] = [
   },
 ];
 
-// --- COMPONENTS ---
-
 const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
   movie,
   isComingSoon,
 }) => {
-  const navigate = useNavigate(); // Hook điều hướng
+  const navigate = useNavigate();
 
   const handleDetailClick = () => {
-    // Điều hướng sang trang chi tiết với ID của phim
     navigate(`/movie/${movie.id}`);
   };
 
@@ -94,9 +88,8 @@ const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
                 "https://placehold.co/400x600?text=No+Image";
             }}
           />
-          {/* LỚP PHỦ HOVER */}
+
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 flex flex-col items-center justify-center gap-3 transition-all duration-300">
-            {/* Nút 1: Mua Vé / Trailer */}
             <Button
               type="primary"
               shape="round"
@@ -106,7 +99,6 @@ const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
               {isComingSoon ? "Xem Trailer" : "Mua Vé"}
             </Button>
 
-            {/* Nút 2: Chi Tiết (Mới Thêm) */}
             <Button
               shape="round"
               icon={<InfoCircleOutlined />}
@@ -127,9 +119,10 @@ const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
         }
         description={
           <div className="flex flex-col gap-2 mt-2">
-            <div className="flex justify-between items-center text-xs text-gray-500">
-              <span>{movie.genre}</span>
-              <span className="bg-blue-50 text-blue-800 px-2 py-0.5 rounded font-medium">
+            <div className="flex justify-between items-center text-xs text-gray-500 gap-2">
+              <span className="truncate flex-1">{movie.genre}</span>
+
+              <span className="bg-blue-50 text-blue-800 px-2 py-0.5 rounded font-medium whitespace-nowrap">
                 {movie.duration}
               </span>
             </div>
@@ -140,20 +133,14 @@ const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
   );
 };
 
-const NewHomePage: React.FC = () => {
+const HomePage: React.FC = () => {
   const [nowShowing, setNowShowing] = useState<HomeMovie[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("1");
 
   useEffect(() => {
     const loadNowShowing = async () => {
       try {
-        setLoading(true);
-
-        // 1. Lấy showtime còn vé
         const showtimes = await showtimeService.getAvailable();
 
-        // 2. MovieId duy nhất
         const movieIdSet = new Set(showtimes.map((s) => s.movieId));
 
         if (movieIdSet.size === 0) {
@@ -161,13 +148,10 @@ const NewHomePage: React.FC = () => {
           return;
         }
 
-        // 3. Lấy toàn bộ movie
         const allMovies = await movieService.getMovies();
 
-        // 4. Filter movie có showtime
         const showingMovies = allMovies.filter((m) => movieIdSet.has(m.id));
 
-        // 5. Map sang format UI
         const mapped: HomeMovie[] = showingMovies.map((m) => ({
           id: m.id,
           title: m.title,
@@ -181,7 +165,6 @@ const NewHomePage: React.FC = () => {
         console.error("Load now showing failed", err);
         setNowShowing([]);
       } finally {
-        setLoading(false);
       }
     };
 
@@ -215,11 +198,9 @@ const NewHomePage: React.FC = () => {
 
   return (
     <Layout className="min-h-screen bg-white">
-      {/* HEADER */}
       <AppHeader />
 
       <Content>
-        {/* HERO SECTION */}
         <div className="relative">
           <Carousel
             autoplay
@@ -242,13 +223,11 @@ const NewHomePage: React.FC = () => {
           </Carousel>
         </div>
 
-        {/* MAIN CONTENT AREA */}
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="mt-4">
             <Tabs
               defaultActiveKey="1"
               items={tabItems}
-              onChange={setActiveTab}
               centered
               size="large"
               tabBarStyle={{
@@ -262,10 +241,9 @@ const NewHomePage: React.FC = () => {
         </div>
       </Content>
 
-      {/* FOOTER */}
       <AppFooter />
     </Layout>
   );
 };
 
-export default NewHomePage;
+export default HomePage;

@@ -1,4 +1,3 @@
-// src/pages/Auth.tsx
 import React, { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,7 +31,7 @@ import AppFooter from "../../components/AppFooter";
 
 const { Option } = Select;
 
-const NewAuth: React.FC = () => {
+const Auth: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("login");
@@ -53,7 +52,6 @@ const NewAuth: React.FC = () => {
     roles: ["user"],
   });
 
-  // --- Handlers giữ nguyên logic ---
   const handleLoginChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setLoginForm((prev) => ({ ...prev, [name]: value }));
@@ -66,13 +64,11 @@ const NewAuth: React.FC = () => {
     setRegisterForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Helper cho Antd Select và DatePicker để tương thích với logic cũ
   const handleSelectChange = (value: string, name: string) => {
     setRegisterForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDateChange = (_: any, dateString: string | string[]) => {
-    // dateString từ Antd là string (YYYY-MM-DD), phù hợp logic cũ
     setRegisterForm((prev) => ({ ...prev, dob: dateString as string }));
   };
 
@@ -109,7 +105,6 @@ const NewAuth: React.FC = () => {
         message.success("Đăng nhập thành công");
         navigate("/", { replace: true });
       } else {
-        // @ts-ignore
         const err = resultAction.payload ?? resultAction.error?.message;
         message.error(err ?? "Đăng nhập thất bại");
       }
@@ -140,8 +135,8 @@ const NewAuth: React.FC = () => {
       const resultAction = await dispatch(registerUser(payload as any));
       if (registerUser.fulfilled.match(resultAction)) {
         message.success("Đăng ký thành công");
-        setActiveTab("login"); // Chuyển tab tự động
-        navigate("/auth", { replace: true }); // Giữ ở trang auth
+        setActiveTab("login");
+        navigate("/auth", { replace: true });
       } else {
         // @ts-ignore
         const err = resultAction.payload ?? resultAction.error?.message;
@@ -152,7 +147,6 @@ const NewAuth: React.FC = () => {
     }
   };
 
-  // Style button gradient
   const gradientButtonStyle: React.CSSProperties = {
     backgroundImage:
       "linear-gradient(to right, #0a64a7 0%, #258dcf 51%, #3db1f3 100%)",
@@ -162,7 +156,6 @@ const NewAuth: React.FC = () => {
     boxShadow: "0 4px 15px rgba(37, 141, 207, 0.3)",
   };
 
-  // Ant Design Theme Customization
   const theme = {
     token: {
       colorPrimary: "#03599d",
@@ -180,7 +173,6 @@ const NewAuth: React.FC = () => {
           style={{ minHeight: "calc(100vh - 64px)" }}
         >
           <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl overflow-hidden">
-            {/* Header / Tabs */}
             <div className="px-8 pt-6 pb-2 bg-white">
               <Tabs
                 activeKey={activeTab}
@@ -197,7 +189,6 @@ const NewAuth: React.FC = () => {
 
             <div className="p-8 pt-4">
               {activeTab === "login" ? (
-                // --- FORM ĐĂNG NHẬP ---
                 <form
                   onSubmit={handleLoginSubmit}
                   className="flex flex-col gap-5"
@@ -254,13 +245,11 @@ const NewAuth: React.FC = () => {
                   </div>
                 </form>
               ) : (
-                // --- FORM ĐĂNG KÝ ---
                 <form
                   onSubmit={handleRegisterSubmit}
                   className="flex flex-col gap-4"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Tên đăng nhập */}
                     <div className="col-span-1 md:col-span-2">
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Tên đăng nhập <span className="text-red-500">*</span>
@@ -279,8 +268,6 @@ const NewAuth: React.FC = () => {
                         onChange={handleRegisterChange}
                       />
                     </div>
-
-                    {/* Email */}
                     <div className="col-span-1 md:col-span-2">
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Email <span className="text-red-500">*</span>
@@ -301,7 +288,6 @@ const NewAuth: React.FC = () => {
                       />
                     </div>
 
-                    {/* Mật khẩu */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Mật khẩu <span className="text-red-500">*</span>
@@ -321,7 +307,6 @@ const NewAuth: React.FC = () => {
                       />
                     </div>
 
-                    {/* Xác nhận mật khẩu */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Xác nhận mật khẩu{" "}
@@ -342,7 +327,6 @@ const NewAuth: React.FC = () => {
                       />
                     </div>
 
-                    {/* Ngày sinh */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Ngày sinh <span className="text-red-500">*</span>
@@ -359,7 +343,6 @@ const NewAuth: React.FC = () => {
                       />
                     </div>
 
-                    {/* Giới tính */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Giới tính
@@ -395,7 +378,6 @@ const NewAuth: React.FC = () => {
                       </Select>
                     </div>
 
-                    {/* Số điện thoại */}
                     <div className="col-span-1 md:col-span-2">
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Số điện thoại <span className="text-red-500">*</span>
@@ -438,4 +420,4 @@ const NewAuth: React.FC = () => {
   );
 };
 
-export default NewAuth;
+export default Auth;

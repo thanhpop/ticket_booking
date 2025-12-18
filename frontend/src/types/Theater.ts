@@ -1,5 +1,5 @@
 export interface Theater {
-    id?: number;
+    id: number;
     name: string;
     location: string;
     capacity: number;

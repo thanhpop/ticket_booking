@@ -14,7 +14,6 @@ import {
   Popconfirm,
   message,
   Spin,
-  Tag,
 } from "antd";
 import {
   PlusOutlined,
@@ -251,7 +250,6 @@ const AdminTheaterPage: React.FC = () => {
         </Spin>
       </Space>
 
-      {/* Create / Edit Modal */}
       <Modal
         title={editing ? "Sửa Rạp" : "Tạo Rạp mới"}
         open={isEditModalVisible}
@@ -288,7 +286,6 @@ const AdminTheaterPage: React.FC = () => {
         </Form>
       </Modal>
 
-      {/* View Modal */}
       <Modal
         title="Chi tiết Rạp"
         open={isViewModalVisible}

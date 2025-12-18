@@ -1,7 +1,14 @@
 import instance from "../config/axios";
 
+export interface Seat {
+  id: number;
+  showtimeId: number;
+  seatNumber: string;
+  isReserved: boolean;
+}
+
 export interface Showtime {
-  id?: number;
+  id: number;
   movieId: number;
   theaterId: number;
   showDate: string;
@@ -9,6 +16,7 @@ export interface Showtime {
   price: number;
   totalSeats: number;
   availableSeats: number;
+  seats?: Seat[];
 }
 
 function toShowtime(s: any): Showtime {
@@ -21,6 +29,14 @@ function toShowtime(s: any): Showtime {
     price: Number(s.price),
     totalSeats: Number(s.totalSeats),
     availableSeats: Number(s.availableSeats),
+    seats: Array.isArray(s.seats)
+      ? s.seats.map((seat: any) => ({
+          id: Number(seat.id),
+          showtimeId: Number(seat.showtimeId),
+          seatNumber: String(seat.seatNumber),
+          isReserved: Boolean(seat.isReserved),
+        }))
+      : [],
   };
 }
 
@@ -82,17 +98,4 @@ export const showtimeService = {
     return Array.isArray(list) ? list.map(toShowtime) : [];
   },
 
-  async getAvailableByMovie(
-    movieId: number,
-    fromDate?: string
-  ): Promise<Showtime[]> {
-    const res = await instance.get(
-      `/showtimes/available/movie/${movieId}`,
-      {
-        params: fromDate ? { fromDate } : undefined,
-      }
-    );
-    const list = res.data?.data ?? [];
-    return Array.isArray(list) ? list.map(toShowtime) : [];
-  },
 };

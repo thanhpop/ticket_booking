@@ -24,7 +24,7 @@ import dayjs from "dayjs";
 import { movieService } from "../../services/Movie";
 import { theaterService } from "../../services/theaterService";
 
-import { showtimeService, type Showtime } from "../../services/showtime";
+import { showtimeService, type Showtime } from "../../services/Showtime";
 
 const { Title } = Typography;
 
@@ -60,7 +60,6 @@ const AdminShowtimeHookPage: React.FC = () => {
     const loadAll = async () => {
       try {
         setLoading(true);
-        // parallel fetch
         const [list, m, t] = await Promise.all([
           showtimeService.getAll(),
           movieService.getMovies(),
@@ -358,7 +357,7 @@ const AdminShowtimeHookPage: React.FC = () => {
           <Form.Item name="theaterId" label="Rạp" rules={[{ required: true }]}>
             <Select
               placeholder="Chọn rạp"
-              optionLabelProp="label" // hiển thị label (tên + địa điểm) trong ô Select khi đã chọn
+              optionLabelProp="label"
               showSearch
               filterOption={(input, option) => {
                 const lab = option?.label?.toString().toLowerCase() ?? "";
@@ -369,7 +368,7 @@ const AdminShowtimeHookPage: React.FC = () => {
                 <Select.Option
                   key={t.id}
                   value={t.id}
-                  label={`${t.name} — ${t.location ?? ""}`} // chuỗi hiển thị trong input sau khi chọn
+                  label={`${t.name} — ${t.location ?? ""}`}
                 >
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <span style={{ fontWeight: 600 }}>{t.name}</span>

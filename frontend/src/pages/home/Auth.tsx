@@ -19,20 +19,33 @@ import {
   Select,
   ConfigProvider,
 } from "antd";
-import { useAppDispatch } from "../../hooks/useAppDispatch";
-import { loginUser, registerUser } from "../../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
 import { Layout } from "antd";
-import type { LoginForm, RegisterForm } from "../../types/Auth";
+import { authService } from "../../services/authService";
 import AppHeader from "../../components/AppHeader";
 import AppFooter from "../../components/AppFooter";
 
 const { Option } = Select;
 
+interface LoginForm {
+  username: string;
+  password: string;
+}
+
+interface RegisterForm {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  dob: string;
+  gender: string;
+  phone: string;
+  roles: string[];
+}
+
 const Auth: React.FC = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("login");
 
@@ -75,41 +88,26 @@ const Auth: React.FC = () => {
   const handleLoginSubmit = async (e?: FormEvent) => {
     if (e) e.preventDefault();
 
-    const payload = {
-      username: loginForm.username,
-      password: loginForm.password,
-    };
-
     try {
-      const resultAction = await dispatch(loginUser(payload as any));
+      const data = await authService.login({
+        username: loginForm.username,
+        password: loginForm.password,
+      });
 
-      if (loginUser.fulfilled.match(resultAction)) {
-        const payloadData =
-          (resultAction.payload as any) ?? (resultAction as any).data ?? null;
+      const userToStore = {
+        userId: data.userId,
+        username: data.username,
+        email: data.email,
+        token: data.accessToken,
+        refreshToken: data.refreshToken,
+      };
 
-        const userToStore = {
-          username: payloadData?.username ?? loginForm.username,
-          email: payloadData?.email ?? null,
-          token: payloadData?.token ?? null,
-          userId: payloadData?.userId ?? null,
-          roles: payloadData?.roles ?? null,
-          refreshToken: payloadData?.refreshToken ?? null,
-        };
+      localStorage.setItem("user", JSON.stringify(userToStore));
 
-        try {
-          sessionStorage.setItem("user", JSON.stringify(userToStore));
-        } catch (err) {
-          console.warn("Không thể lưu vào sessionStorage", err);
-        }
-
-        message.success("Đăng nhập thành công");
-        navigate("/", { replace: true });
-      } else {
-        const err = resultAction.payload ?? resultAction.error?.message;
-        message.error(err ?? "Đăng nhập thất bại");
-      }
-    } catch (err) {
-      message.error("Lỗi khi gọi API");
+      message.success("Đăng nhập thành công");
+      navigate("/", { replace: true });
+    } catch (err: any) {
+      message.error(err.message || "Đăng nhập thất bại");
     }
   };
 
@@ -122,7 +120,7 @@ const Auth: React.FC = () => {
     }
 
     try {
-      const payload = {
+      await authService.register({
         username: registerForm.username,
         email: registerForm.email,
         password: registerForm.password,
@@ -131,19 +129,12 @@ const Auth: React.FC = () => {
         gender: registerForm.gender,
         phone: registerForm.phone,
         role: registerForm.roles,
-      };
-      const resultAction = await dispatch(registerUser(payload as any));
-      if (registerUser.fulfilled.match(resultAction)) {
-        message.success("Đăng ký thành công");
-        setActiveTab("login");
-        navigate("/auth", { replace: true });
-      } else {
-        // @ts-ignore
-        const err = resultAction.payload ?? resultAction.error?.message;
-        message.error("Đăng ký thất bại");
-      }
-    } catch (err) {
-      message.error("Lỗi khi gọi API");
+      });
+
+      message.success("Đăng ký thành công");
+      setActiveTab("login");
+    } catch (err: any) {
+      message.error(err.message || "Đăng ký thất bại");
     }
   };
 

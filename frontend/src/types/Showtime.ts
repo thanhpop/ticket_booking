@@ -11,12 +11,12 @@ export interface Showtime {
   id: number;
   movieId: number;
   theaterId: number;
-  showDate: string; // "2025-11-20T00:00:00"
-  showTime: string; // "20:00"
+  showDate: string; 
+  showTime: string; 
   price: number;
   totalSeats: number;
   availableSeats: number;
-  seats?: Seat[]; // Có thể có hoặc không tùy endpoint
+  seats?: Seat[]; 
 }
 
 export interface ApiResponse<T> {

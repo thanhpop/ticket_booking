@@ -5,8 +5,8 @@ export interface Showtime {
   id: number;
   movieId: number;
   theaterId: number;
-  showDate: string | null; // ISO date
-  showTime: string | null; // "HH:mm"
+  showDate: string | null; 
+  showTime: string | null; 
   price: number;
   totalSeats: number;
   availableSeats: number;
@@ -17,7 +17,6 @@ interface ShowtimeState {
 }
 
 const initialState: ShowtimeState = {
-  // sample data seeded here (you can remove / replace)
   items: [
     {
       id: 7,
@@ -42,7 +41,7 @@ const slice = createSlice({
     addShowtime(state, action: PayloadAction<Omit<Showtime, "id">>) {
       const nextId = state.items.length ? Math.max(...state.items.map((s) => s.id)) + 1 : 1;
       const item: Showtime = { id: nextId, ...action.payload };
-      state.items.unshift(item); // newest first
+      state.items.unshift(item); 
     },
     updateShowtime(state, action: PayloadAction<{ id: number; changes: Partial<Showtime> }>) {
       const { id, changes } = action.payload;
@@ -54,7 +53,6 @@ const slice = createSlice({
     removeShowtime(state, action: PayloadAction<number>) {
       state.items = state.items.filter((s) => s.id !== action.payload);
     },
-    // optional helper to reset to initial sample
     resetShowtimes(state) {
       state.items = initialState.items.slice();
     },

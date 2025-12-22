@@ -1,4 +1,3 @@
-// src/services/theater.ts
 import instance from '../config/axios';
 import type { Theater } from '../types/Theater';
 
@@ -12,9 +11,7 @@ function toTheater(t: any): Theater {
 }
 
 export const theaterService = {
-  /**
-   * Get all theaters, optional search by name or location (query param `location` used by backend)
-   */
+
   async getTheaters(q?: string): Promise<Theater[]> {
     const params = q ? { location: q } : undefined;
     const res = await instance.get('/theater', { params });

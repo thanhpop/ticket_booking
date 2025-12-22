@@ -41,7 +41,7 @@ import {
   updateMovie,
   removeMovie,
 } from "../../features/movies/moviesSlice";
-import movieService from "../../services/Movie";
+import movieService from "../../services/movieService";
 
 const { Title } = Typography;
 const { Option } = Select;

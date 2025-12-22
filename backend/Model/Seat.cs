@@ -20,7 +20,7 @@ namespace backend.Model
         public bool IsReserved { get; set; } = false;
 
         [Column("reservation_id")]
-        public long? ReservationId { get; set; }
+        public string? ReservationId { get; set; }
 
 
         [ForeignKey("ReservationId")]

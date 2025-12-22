@@ -19,7 +19,6 @@ namespace backend.Controller
             _service = service;
         }
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.GetAllAsync();
@@ -27,8 +26,7 @@ namespace backend.Controller
         }
 
         [HttpGet("{id:long}")]
-        [Authorize]
-        public async Task<IActionResult> GetById(long id)
+        public async Task<IActionResult> GetById(string id)
         {
             var reservation = await _service.GetByIdAsync(id);
             if (reservation == null)
@@ -37,7 +35,6 @@ namespace backend.Controller
             return Ok(reservation);
         }
         [HttpPost]
-
         public async Task<IActionResult> CreateReservation(ReservationRequestDto dto)
         {
 
@@ -46,9 +43,18 @@ namespace backend.Controller
 
 
         }
+        [HttpPut("confirm/{id}")]
+        public async Task<IActionResult> ConfirmReservation(string id)
+        {
+            var existing = await _service.GetByIdAsync(id);
+            if (existing == null)
+                return NotFound(ApiResponse<string>.Fail("Reservation not found", 404));
+
+            await _service.ConfirmReservationAsync(id);
+            return Ok(ApiResponse<string>.Success("Reservation confirmed"));
+        }
         [HttpPut("{id}")]
-        [Authorize(Roles = "ADMIN")]
-        public async Task<IActionResult> UpdateAsync(long id)
+        public async Task<IActionResult> UpdateAsync(string id)
         {
             var existing = await _service.GetByIdAsync(id);
             if (existing == null)
@@ -58,7 +64,6 @@ namespace backend.Controller
             return NoContent();
         }
         [HttpGet("user/{userId:long}")]
-        [Authorize]
         public async Task<IActionResult> GetByUser(long? userId)
         {
             if (userId == null)

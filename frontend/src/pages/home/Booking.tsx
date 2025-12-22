@@ -22,9 +22,12 @@ import {
 } from "@ant-design/icons";
 import AppHeader from "../../components/AppHeader";
 import AppFooter from "../../components/AppFooter";
-import { showtimeService } from "../../services/Showtime";
-import movieService from "../../services/Movie";
+import { showtimeService } from "../../services/showtimeService";
+import movieService from "../../services/movieService";
 import theaterService from "../../services/theaterService";
+
+import { reservationService } from "../../services/reservationService";
+import { paymentService } from "../../services/paymentService";
 import type { Seat } from "../../types/Seat";
 
 const { Content } = Layout;
@@ -32,22 +35,10 @@ const { Text, Title } = Typography;
 
 const paymentMethods = [
   {
-    id: "momo",
-    name: "Ví MoMo",
-    icon: "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
-    color: "#a50064",
-  },
-  {
-    id: "zalopay",
-    name: "ZaloPay",
-    icon: "https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay-Square.png",
-    color: "#0068ff",
-  },
-  {
-    id: "card",
-    name: "Thẻ ATM/Visa/Master",
-    icon: "https://cdn-icons-png.flaticon.com/512/179/179457.png",
-    color: "#1f2937",
+    id: "vnpay",
+    name: "VNPay QR",
+    icon: "https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR-1.png",
+    color: "#005baa",
   },
 ];
 
@@ -63,11 +54,41 @@ const BookingPage: React.FC = () => {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
   const [selectedPayment, setSelectedPayment] = useState<string>("");
-  const [contactInfo] = useState({
-    name: "Hoàng Minh Thành",
-    phone: "0999999999",
-    email: "alpha@gmail.com",
+  const [contactInfo, setContactInfo] = useState<{
+    name: string;
+    email: string;
+  }>({
+    name: "",
+    email: "",
   });
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+
+    if (!userStr) {
+      setContactInfo({
+        name: "",
+        email: "",
+      });
+      return;
+    }
+
+    try {
+      const user = JSON.parse(userStr);
+
+      setContactInfo({
+        name: user.username ?? "",
+        email: user.email ?? "",
+      });
+    } catch (err) {
+      localStorage.removeItem("user");
+      setContactInfo({
+        name: "",
+        email: "",
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (!showtimeId) return;
 
@@ -85,12 +106,12 @@ const BookingPage: React.FC = () => {
         setTheater(theaterData);
       } catch (err) {
         message.error("Không tải được dữ liệu suất chiếu");
-      } finally {
       }
     };
 
     fetchData();
   }, [showtimeId]);
+
   const sortSeats = (seats: Seat[]) => {
     return [...seats].sort((a, b) => {
       const rowA = a.seatNumber.charAt(0);
@@ -125,17 +146,48 @@ const BookingPage: React.FC = () => {
   const ticketPrice = showtime?.price ?? 0;
   const totalPrice = selectedSeats.length * ticketPrice;
 
-  const handleAction = () => {
+  const handleAction = async () => {
     if (currentStep === 1) {
       setCurrentStep(2);
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      if (!selectedPayment) {
-        message.error("Vui lòng chọn phương thức thanh toán!");
+      return;
+    }
+
+    if (!selectedPayment) {
+      message.error("Vui lòng chọn phương thức thanh toán!");
+      return;
+    }
+
+    try {
+      message.loading({ content: "Đang đặt ghế...", key: "payment" });
+
+      const userStr = localStorage.getItem("user");
+      if (!userStr) {
+        message.error("Vui lòng đăng nhập!");
         return;
       }
-      message.success("Đặt vé thành công!");
-      setTimeout(() => navigate("/"), 1500);
+
+      const user = JSON.parse(userStr);
+
+      const reservation = await reservationService.createReservation({
+        userId: user.userId,
+        showtimeId: Number(showtimeId),
+        seatIds: selectedSeats.map((s) => s.id),
+      });
+
+      const paymentUrl = await paymentService.createVnPayPayment({
+        reservationId: reservation.id,
+        amount: reservation.totalPrice,
+      });
+
+      message.success({
+        content: "Chuyển hướng đến VNPay...",
+        key: "payment",
+      });
+
+      window.location.href = paymentUrl;
+    } catch (err: any) {
+      message.error(err?.response?.data?.message || "Thanh toán thất bại");
     }
   };
 
@@ -255,7 +307,7 @@ const BookingPage: React.FC = () => {
                           Số điện thoại
                         </Text>
                         <div className="text-lg font-semibold text-gray-800 tracking-wide">
-                          {contactInfo.phone}
+                          9999999999
                         </div>
                       </div>
                       <div>
@@ -272,11 +324,12 @@ const BookingPage: React.FC = () => {
                   <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
                     <Title
                       level={4}
-                      className="mb-6 border-l-4 border-green-600 pl-3"
+                      className="mb-6 border-l-4 border-blue-600 pl-3"
                     >
                       Phương thức thanh toán
                     </Title>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      {" "}
                       {paymentMethods.map((method) => (
                         <div
                           key={method.id}
@@ -287,7 +340,7 @@ const BookingPage: React.FC = () => {
                               : "border-gray-200 hover:border-gray-400 hover:bg-gray-50"
                           }`}
                         >
-                          <div className="w-10 h-10 flex-shrink-0">
+                          <div className="w-16 h-10 flex-shrink-0 flex items-center justify-center">
                             <img
                               src={method.icon}
                               alt={method.name}
@@ -295,8 +348,11 @@ const BookingPage: React.FC = () => {
                             />
                           </div>
                           <div className="flex-1">
-                            <div className="font-bold text-gray-800">
+                            <div className="font-bold text-gray-800 text-lg">
                               {method.name}
+                            </div>
+                            <div className="text-gray-500 text-sm">
+                              Quét mã QR qua ứng dụng ngân hàng hoặc ví VNPay
                             </div>
                           </div>
                           <Radio checked={selectedPayment === method.id} />
@@ -345,9 +401,10 @@ const BookingPage: React.FC = () => {
                           {showtime?.showTime}
                         </span>
                         <span className="text-gray-500 text-xs">
-                          {new Date(showtime?.showDate).toLocaleDateString(
-                            "vi-VN"
-                          )}
+                          {showtime?.showDate &&
+                            new Date(showtime.showDate).toLocaleDateString(
+                              "vi-VN"
+                            )}
                         </span>
                       </div>
                     </div>

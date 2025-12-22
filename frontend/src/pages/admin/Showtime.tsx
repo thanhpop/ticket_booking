@@ -1,4 +1,3 @@
-// src/pages/AdminShowtimeHookPage.tsx
 import React, { useMemo, useState, useEffect } from "react";
 import {
   Table,
@@ -21,10 +20,10 @@ import {
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
-import { movieService } from "../../services/Movie";
+import { movieService } from "../../services/movieService";
 import { theaterService } from "../../services/theaterService";
 
-import { showtimeService, type Showtime } from "../../services/Showtime";
+import { showtimeService, type Showtime } from "../../services/showtimeService";
 
 const { Title } = Typography;
 

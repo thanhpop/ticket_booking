@@ -2,7 +2,7 @@
 {
     public class ReservationDto
     {
-        public long Id { get; set; }
+        public string Id { get; set; } = null!;
         public long UserId { get; set; }
         public long ShowtimeId { get; set; }
         public DateTime ReservationTime { get; set; }

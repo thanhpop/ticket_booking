@@ -45,7 +45,6 @@ const AdminLayout: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      {/* Fixed Header */}
       <Header
         style={{
           position: "fixed",

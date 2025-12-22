@@ -87,6 +87,7 @@ namespace backend.Service.Implementations
                 AccessToken = token,
                 UserId = user.id,
                 Username = user.username,
+                Email = user.email,
                 RefreshToken = refreshToken,
             };
 
@@ -142,6 +143,7 @@ namespace backend.Service.Implementations
                 AccessToken = accessToken,
                 UserId = user.id,
                 Username = user.username,
+                Email = user.email,
                 RefreshToken = newRefreshToken,
             };
 

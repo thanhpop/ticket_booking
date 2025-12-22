@@ -19,7 +19,7 @@ namespace backend.Controller
 
             _vnPayService = vnPayService;
         }
-        [HttpPost("create")]
+        [HttpPost("vnpay")]
         public IActionResult CreatePaymentUrlVnpay(PaymentInformationModel model)
         {
             var url = _vnPayService.CreatePaymentUrl(model, HttpContext);

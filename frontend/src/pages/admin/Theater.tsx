@@ -1,4 +1,3 @@
-// src/pages/AdminTheaterPage.tsx
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Table,

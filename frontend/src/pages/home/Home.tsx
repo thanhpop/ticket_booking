@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom";
 import AppFooter from "../../components/AppFooter";
 
 import { useEffect } from "react";
-import { showtimeService } from "../../services/Showtime";
-import movieService from "../../services/Movie";
+import { showtimeService } from "../../services/showtimeService";
+import movieService from "../../services/movieService";
 
 const { Content } = Layout;
 const { Meta } = Card;

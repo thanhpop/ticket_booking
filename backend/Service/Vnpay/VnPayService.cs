@@ -14,7 +14,7 @@ namespace backend.Service.Vnpay
         {
             var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
-            var tick = DateTime.Now.Ticks.ToString();
+
             var pay = new VnPayLibrary();
             var urlCallBack = _configuration["Vnpay:PaymentBackReturnUrl"];
 
@@ -27,13 +27,22 @@ namespace backend.Service.Vnpay
             pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
-            pay.AddRequestData("vnp_OrderInfo", $"{model.Name} {model.OrderDescription} {model.Amount}");
-            pay.AddRequestData("vnp_OrderType", model.OrderType);
-            pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
-            pay.AddRequestData("vnp_TxnRef", tick);
 
-            var paymentUrl =
-                pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
+            // ✅ OrderInfo mặc định
+            pay.AddRequestData($"vnp_OrderInfo", $"Thanh toan don - ReservationId: {model.ReservationId}");
+
+            // ✅ OrderType mặc định
+            pay.AddRequestData("vnp_OrderType", "other");
+
+            pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
+
+            // ✅ TxnRef = ReservationId
+            pay.AddRequestData("vnp_TxnRef", model.ReservationId);
+
+            var paymentUrl = pay.CreateRequestUrl(
+                _configuration["Vnpay:BaseUrl"],
+                _configuration["Vnpay:HashSecret"]
+            );
 
             return paymentUrl;
         }

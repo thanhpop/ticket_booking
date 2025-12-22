@@ -1,9 +1,9 @@
-export interface LoginForm {
+export interface LoginPayload {
   username: string;
   password: string;
 }
 
-export interface RegisterForm {
+export interface RegisterPayload {
   username: string;
   email: string;
   password: string;
@@ -11,5 +11,13 @@ export interface RegisterForm {
   dob: string;
   gender: string;
   phone: string;
-  roles: string[];
+  role: string[];
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  userId: number;
+  username: string;
+  email: string;
 }

@@ -1,4 +1,4 @@
-
+﻿
 
 CREATE TABLE IF NOT EXISTS users
 (
@@ -75,8 +75,7 @@ CREATE TABLE IF NOT EXISTS users
     CONSTRAINT fk_seat_showtime FOREIGN KEY (showtime_id) REFERENCES showtime (id) ON DELETE CASCADE,
     UNIQUE ( showtime_id, seat_number)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+
 
   CREATE TABLE IF NOT EXISTS refresh_token
 (
@@ -115,15 +114,22 @@ CREATE TABLE IF NOT EXISTS user_role
   COLLATE = utf8mb4_unicode_ci;
 
 
-  CREATE TABLE IF NOT EXISTS reservations (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL, -- who made the reservation
-    showtime_id BIGINT NOT NULL, -- what movie/theater/time
-    reservation_time TIMESTAMP NOT NULL, -- when they made it
-    status_id INT NOT NULL DEFAULT 1, -- 1=pending, 2=confirmed, 3=cancelled etc
-    total_price DECIMAL(10, 2) NOT NULL, -- sum of all seats
-    paid BOOLEAN NOT NULL DEFAULT FALSE, -- payment status
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (showtime_id) REFERENCES showtime(id)
-    -- No FK for status_id cuz it's from master_data
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CREATE TABLE reservations (
+    id VARCHAR(40) NOT NULL PRIMARY KEY,   -- HEX + timestamp
+
+    user_id BIGINT NOT NULL,               -- người đặt vé
+    showtime_id BIGINT NOT NULL,            -- suất chiếu
+
+    reservation_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    status_id INT NOT NULL DEFAULT 1,       -- 1=pending, 2=confirmed, 3=canceled
+    total_price DECIMAL(10,2) NOT NULL,
+    paid BOOLEAN NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_reservation_user
+        FOREIGN KEY (user_id) REFERENCES users(id),
+
+    CONSTRAINT fk_reservation_showtime
+        FOREIGN KEY (showtime_id) REFERENCES showtime(id)
+) ENGINE=InnoDB
+

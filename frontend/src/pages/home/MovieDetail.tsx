@@ -1,4 +1,3 @@
-// src/pages/MovieDetailPage.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -21,10 +20,10 @@ import {
 } from "@ant-design/icons";
 import AppHeader from "../../components/AppHeader";
 import AppFooter from "../../components/AppFooter";
-import movieService from "../../services/Movie";
+import movieService from "../../services/movieService";
 import type { Movie } from "../../types/Movie";
 
-import { showtimeService } from "../../services/Showtime";
+import { showtimeService } from "../../services/showtimeService";
 import type { Showtime } from "../../types/Showtime";
 
 import theaterService from "../../services/theaterService";
@@ -91,10 +90,6 @@ const MovieDetailPage: React.FC = () => {
         );
 
         setSchedules(processedData);
-
-        // if (processedData.length > 0) {
-        //   setSelectedDate(processedData[0].dateKey);
-        // }
         setSelectedDate(generateNext7Days()[0]);
       } catch (err) {
         console.error("Failed to load data", err);
@@ -113,10 +108,36 @@ const MovieDetailPage: React.FC = () => {
     for (let i = 0; i < 7; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
-      days.push(d.toISOString().split("T")[0]); // YYYY-MM-DD
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+
+      days.push(`${yyyy}-${mm}-${dd}`);
     }
 
     return days;
+  };
+  const handleShowtimeClick = (showtimeId: number) => {
+    const userStr = localStorage.getItem("user");
+
+    if (!userStr) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const user = JSON.parse(userStr);
+
+      if (!user.userId) {
+        navigate("/login");
+        return;
+      }
+
+      navigate(`/booking/${showtimeId}`);
+    } catch (err) {
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
   };
 
   const processShowtimesToSchedule = (
@@ -125,7 +146,6 @@ const MovieDetailPage: React.FC = () => {
   ): UISchedule[] => {
     const days = generateNext7Days();
 
-    // group showtime theo ngày
     const showtimeMap: Record<string, Showtime[]> = {};
     showtimes.forEach((st) => {
       const dateKey = st.showDate.split("T")[0];
@@ -313,7 +333,7 @@ const MovieDetailPage: React.FC = () => {
                                   key={st.id}
                                   size="large"
                                   className="h-12 w-28 border-gray-300 font-bold text-gray-700 text-base hover:!border-blue-600 hover:!text-blue-600 hover:!bg-blue-50 rounded-lg shadow-sm transition-all"
-                                  onClick={() => navigate(`/booking/${st.id}`)}
+                                  onClick={() => handleShowtimeClick(st.id)}
                                 >
                                   {st.time}
                                 </Button>

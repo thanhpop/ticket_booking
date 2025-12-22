@@ -1,64 +1,52 @@
-import instance from '../config/axios';
+import instance from "../config/axios";
+import type {
+  LoginPayload,
+  RegisterPayload,
+  AuthResponse,
+} from "../types/Auth";
 
-export interface LoginPayload {
-  username: string;
-  password: string;
+function toAuthResponse(d: any): AuthResponse {
+  return {
+    accessToken: String(d.accessToken ?? ""),
+    refreshToken: String(d.refreshToken ?? ""),
+    userId: Number(d.userId),
+    username: String(d.username ?? ""),
+    email: String(d.email ?? ""),
+  };
 }
 
-export interface RegisterPayload {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword?: string;
-  dob?: string;
-  gender?: string;
-  phone?: string;
-}
+export const authService = {
+  async login(payload: LoginPayload): Promise<AuthResponse> {
+    const res = await instance.post("/auth/login", payload);
+    if (!res.data?.data) throw new Error("Login failed");
+    return toAuthResponse(res.data.data);
+  },
 
-export interface AuthData {
-  token?: string;
-  refreshToken?: string;
-  email?: string;
-  roles?: string[];
-  username?: string;
-  userId?: number;
-  type?: string; 
-}
+  async register(payload: RegisterPayload): Promise<{
+    username: string;
+    email: string;
+  }> {
+    const res = await instance.post("/auth/register", payload);
+    if (!res.data?.data) throw new Error("Register failed");
+    return {
+      username: res.data.data.username,
+      email: res.data.data.email,
+    };
+  },
 
+  async refresh(refreshToken: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    const res = await instance.post("/auth/refresh", { refreshToken });
+    if (!res.data?.data) throw new Error("Refresh failed");
+    return {
+      accessToken: res.data.data.accessToken,
+      refreshToken: res.data.data.refreshToken,
+    };
+  },
 
-export interface AuthResponse {
-  code?: number;
-  message?: string;
-  data?: AuthData;
-}
-
-export const setAuthToken = (token?: string | null) => {
-  if (token) {
-    instance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  } else {
-    delete instance.defaults.headers.common['Authorization'];
-  }
-};
-
-export const login = async (payload: LoginPayload): Promise<AuthResponse> => {
-  const { data } = await instance.post<AuthResponse>('/auth/login', payload);
-  return data;
-};
-
-
-export const register = async (
-  payload: RegisterPayload
-): Promise<AuthResponse> => {
-  const { data } = await instance.post<AuthResponse>('/auth/register', payload);
-  return data;
-};
-
-export const logout = () => {
-  try {
-
-    sessionStorage.removeItem('user');
-  } catch (err) {
-    console.warn('Lỗi khi clear sessionStorage', err);
-  }
-  setAuthToken(null);
+  async logout(refreshToken: string): Promise<void> {
+    await instance.post("/auth/logout", { refreshToken });
+  },
 };

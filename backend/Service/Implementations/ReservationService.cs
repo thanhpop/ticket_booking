@@ -16,6 +16,15 @@ namespace backend.Service.Implementations
             _db = db;
             _log = log;
         }
+        private static string GenerateHexId()
+        {
+            long time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            string hexTime = time.ToString("X");
+
+            string random = Random.Shared.Next(0, int.MaxValue).ToString("X");
+
+            return $"{hexTime}{random}";
+        }
 
         public async Task<IEnumerable<ReservationDto>> GetAllAsync()
         {
@@ -39,7 +48,7 @@ namespace backend.Service.Implementations
                    }).ToList()
                }).ToListAsync();
         }
-        public async Task<ReservationDto?> GetByIdAsync(long id)
+        public async Task<ReservationDto?> GetByIdAsync(string id)
         {
             var reservation = await _db.Reservations
         .AsNoTracking()
@@ -119,6 +128,7 @@ namespace backend.Service.Implementations
        
             var reservation = new Reservation
             {
+                Id = GenerateHexId(),
                 UserId = dto.UserId,
                 ShowtimeId = dto.ShowtimeId,
                 ReservationTime = DateTime.Now,
@@ -168,7 +178,32 @@ namespace backend.Service.Implementations
             return reservationDto;
         }
 
-        public async Task<bool> CancelReservationAsync(long reservationId)
+        public async Task<bool> ConfirmReservationAsync(string reservationId)
+        {
+            var reservation = await _db.Reservations
+                .FirstOrDefaultAsync(r => r.Id == reservationId);
+
+            if (reservation == null)
+                return false;
+
+            if (reservation.StatusId == 3)
+                throw new InvalidOperationException("Cannot confirm a canceled reservation");
+
+            // Đã confirm rồi thì thôi
+            if (reservation.StatusId == 2 && reservation.Paid)
+                return true;
+
+            reservation.StatusId = 2; 
+            reservation.Paid = true;
+
+            _db.Reservations.Update(reservation);
+            await _db.SaveChangesAsync();
+
+            return true;
+        }
+
+
+        public async Task<bool> CancelReservationAsync(string reservationId)
         {
             var reservation = await _db.Reservations.Include(r => r.Showtime) 
         .Include(r => r.Seats)    
@@ -237,7 +272,7 @@ namespace backend.Service.Implementations
 
             return reservations;
         }
-        public async Task<bool> DeleteAsync(long id)
+        public async Task<bool> DeleteAsync(string id)
         {
             var reservation = await _db.Reservations.FindAsync(id);
             if (reservation == null) return false;
@@ -259,8 +294,8 @@ namespace backend.Service.Implementations
         {
             return statusId switch
             {
-                1 => "CONFIRMED",
-                2 => "PAID",
+                1 => "PENDING",
+                2 => "CONFIRMED",
                 3 => "CANCELED",
                 _ => "UNKNOWN"
             };

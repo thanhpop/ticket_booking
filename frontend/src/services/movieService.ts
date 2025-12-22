@@ -1,4 +1,3 @@
-// src/services/movie.ts
 import instance from '../config/axios';
 import type { Movie } from '../types/Movie';
 import moment from 'moment';

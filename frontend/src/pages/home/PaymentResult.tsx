@@ -1,7 +1,8 @@
 import { useMemo, useEffect, useState, useRef, type JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Result, Button, message, Typography } from "antd";
-import { orderService } from "../../services/orderService";
+import { paymentService } from "../../services/paymentService";
+import { reservationService } from "../../services/reservationService";
 
 const { Text } = Typography;
 
@@ -49,101 +50,28 @@ export default function PaymentResult(): JSX.Element {
   const success = qp.responseCode === "00";
 
   useEffect(() => {
-    if (!success) return;
-
-    if (didConfirmRef.current) {
-      console.debug("confirmOrder skipped: already attempted (didConfirmRef)");
-      return;
-    }
-
+    if (didConfirmRef.current) return;
     didConfirmRef.current = true;
 
-    let mounted = true;
-    const key = "confirmOrder";
-
-    const doConfirm = async () => {
-      let userId: number | undefined;
+    const handleResult = async () => {
       try {
-        const userRaw = sessionStorage.getItem("user");
-        if (userRaw) {
-          const u = JSON.parse(userRaw);
-          userId = u?.id ?? u?.userId ?? undefined;
-        }
-        if (!userId) {
-          const uid = sessionStorage.getItem("userId");
-          if (uid) userId = Number(uid);
-        }
-      } catch (e) {
-        console.warn("Không parse user từ sessionStorage", e);
-      }
-
-      let cinemaHallId: number | undefined;
-      try {
-        const ch = sessionStorage.getItem("cinemaHallId");
-        if (ch) {
-          const n = Number(ch);
-          if (Number.isFinite(n)) cinemaHallId = n;
-        }
-      } catch (e) {
-        console.warn("Không parse cinemaHallId từ sessionStorage", e);
-      }
-
-      const payload = {
-        orderId: qp.txnRef,
-        userId: userId,
-        cinemaHallId: cinemaHallId,
-        orderStatus: "CONFIRMED",
-        paymentMethod: "CASH",
-        paymentStatus: "PENDING",
-        totalAmount: String(qp.amountNum),
-      };
-
-      try {
-        console.debug("Calling confirmOrder with payload:", payload);
-        const resp = await orderService.confirmOrder(payload);
-        if (!mounted) return;
-
-        const ok =
-          !!resp &&
-          ((typeof (resp as any).code === "number" &&
-            (resp as any).code === 200) ||
-            (resp as any).success === true ||
-            !("code" in (resp as any)));
-
-        if (ok) {
-          message.success({
-            content: "Xác nhận đơn thành công",
-            key,
-            duration: 3,
-          });
-          try {
-            sessionStorage.removeItem("cinemaHallId");
-            sessionStorage.removeItem("orderId");
-          } catch (e) {
-            /* ignore */
-          }
+        if (success) {
+          await paymentService.confirmReservation(qp.txnRef);
+          // message.success("Thanh toán & giữ ghế thành công");
         } else {
-          message.error({ content: "Xác nhận đơn thất bại", key, duration: 4 });
-          console.error("confirmOrder failed:", resp);
+          await reservationService.cancelReservation(qp.txnRef);
+          // message.error("Thanh toán thất bại, ghế đã được hủy");
         }
       } catch (err: any) {
-        if (!mounted) return;
-        console.error("Error calling confirmOrder:", err);
-        console.error("error.response:", err?.response ?? err);
-        message.error({
-          content: err?.message ?? "Lỗi khi xác nhận đơn",
-          key,
-          duration: 4,
-        });
+        console.error(err);
+        message.error(
+          err?.response?.data?.message || "Có lỗi xảy ra khi xử lý giao dịch"
+        );
       }
     };
 
-    doConfirm();
-
-    return () => {
-      mounted = false;
-    };
-  }, [success, qp.txnRef, qp.amountNum]);
+    handleResult();
+  }, [success, qp.txnRef]);
 
   useEffect(() => {
     if (secondsLeft <= 0) {
@@ -168,26 +96,50 @@ export default function PaymentResult(): JSX.Element {
         background: "#f5f7fb",
       }}
     >
-      <div style={{ textAlign: "center" }}>
+      <div
+        style={{
+          background: "#fff",
+          padding: 40,
+          borderRadius: 12,
+          boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+          maxWidth: 560,
+          width: "100%",
+        }}
+      >
         <Result
           status={success ? "success" : "error"}
-          title={success ? "Thanh toán thành công" : "Thanh toán thất bại"}
+          title={
+            <span style={{ fontSize: 24, fontWeight: 600 }}>
+              {success ? "Thanh toán thành công" : "Thanh toán thất bại"}
+            </span>
+          }
           subTitle={
-            success
-              ? `Giao dịch ${qp.txnRef} đã được xử lý thành công.`
-              : `Giao dịch ${qp.txnRef} không thành công (mã: ${qp.responseCode}).`
+            <span style={{ fontSize: 17 }}>
+              {success
+                ? `Giao dịch ${qp.txnRef} đã được xử lý thành công.`
+                : `Giao dịch ${qp.txnRef} không thành công (mã: ${qp.responseCode}).`}
+            </span>
           }
           extra={[
-            <Button key="home" type="primary" onClick={() => navigate("/")}>
+            <Button
+              key="home"
+              type="primary"
+              size="large"
+              style={{ fontSize: 15, height: 46, padding: "0 28px" }}
+              onClick={() => navigate("/")}
+            >
               Về trang chủ
             </Button>,
           ]}
         />
 
-        <div style={{ marginTop: 12 }}>
-          <Text type="secondary">
+        <div style={{ marginTop: 16, textAlign: "center" }}>
+          <Text type="secondary" style={{ fontSize: 15 }}>
             Trang sẽ tự động chuyển về trang chủ sau{" "}
-            <Text strong>{secondsLeft}</Text> giây.
+            <Text strong style={{ fontSize: 16 }}>
+              {secondsLeft}
+            </Text>{" "}
+            giây.
           </Text>
         </div>
       </div>

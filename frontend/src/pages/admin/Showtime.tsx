@@ -276,7 +276,8 @@ const AdminShowtimeHookPage: React.FC = () => {
                 placeholder="Tìm kiếm..."
                 allowClear
                 onSearch={setSearch}
-                style={{ width: 350 }}
+                enterButton
+                style={{ width: 360, fontSize: 16 }}
               />
             </div>
           </Col>

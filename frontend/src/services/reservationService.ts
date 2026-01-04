@@ -28,4 +28,8 @@ export const reservationService = {
     await instance.put(`/reservation/${reservationId}`);
 
   },
+    getAllReservations: async (): Promise<ReservationResponse[]> => {
+    const res = await instance.get("/reservation");
+    return res.data;
+  },
 };

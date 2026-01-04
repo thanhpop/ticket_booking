@@ -253,7 +253,7 @@ const Auth: React.FC = () => {
                             className="text-gray-400 mr-2"
                           />
                         }
-                        placeholder="Chọn tên đăng nhập"
+                        placeholder="Nhập tên đăng nhập"
                         name="username"
                         value={registerForm.username}
                         onChange={handleRegisterChange}

@@ -69,10 +69,16 @@ const AppHeader: React.FC = () => {
       <div className="flex items-center gap-4">
         {user ? (
           <div className="flex items-center gap-3">
-            <span className="font-medium text-gray-700 select-none">
-              Xin chào,{" "}
-              <span className="text-blue-600 font-bold">{user.username}</span>
-            </span>
+            <div
+              className="cursor-pointer flex items-center hover:opacity-70 transition-opacity"
+              onClick={() => navigate("/profile")}
+              title="Xem thông tin tài khoản"
+            >
+              <span className="font-medium text-gray-700 select-none">
+                Xin chào,{" "}
+                <span className="text-blue-600 font-bold">{user.username}</span>
+              </span>
+            </div>
 
             <Button
               type="text"

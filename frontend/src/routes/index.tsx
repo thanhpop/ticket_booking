@@ -13,6 +13,8 @@ import Auth from "../pages/home/Auth.tsx";
 import MovieDetailPage from "../pages/home/MovieDetail.tsx";
 import BookingPage from "../pages/home/Booking.tsx";
 import ReservationPage from "../pages/admin/Reservation.tsx";
+import ProfilePage from "../pages/home/ProfilePage.tsx";
+import UserManagementPage from "../pages/admin/User.tsx";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -21,12 +23,14 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<HomePage />} />
       <Route path="/movie/:id" element={<MovieDetailPage />} />
       <Route path="/booking/:showtimeId" element={<BookingPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
       <Route path="/paymentResult" element={<PaymentResult />} />
       <Route path="/admin" element={<AdminLayout />}>
         <Route path="movie" element={<MoviePage />} />
         <Route path="theater" element={<TheaterPage />} />
         <Route path="showtime" element={<Showtime />} />
         <Route path="reservations" element={<ReservationPage />} />
+        <Route path="users" element={<UserManagementPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

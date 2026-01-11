@@ -36,6 +36,11 @@ const AdminLayout: React.FC = () => {
         icon: <CalendarOutlined />,
         label: <Link to="/admin/reservations">Đơn đặt</Link>,
       },
+      {
+        key: "/admin/users",
+        icon: <CalendarOutlined />,
+        label: <Link to="/admin/users">Tài khoản</Link>,
+      },
     ],
     []
   );

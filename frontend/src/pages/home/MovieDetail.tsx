@@ -10,6 +10,7 @@ import {
   Divider,
   Spin,
   Empty,
+  Modal,
 } from "antd";
 import {
   PlayCircleOutlined,
@@ -17,6 +18,7 @@ import {
   CalendarOutlined,
   ArrowLeftOutlined,
   EnvironmentOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import AppHeader from "../../components/AppHeader";
 import AppFooter from "../../components/AppFooter";
@@ -53,6 +55,8 @@ const MovieDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [schedules, setSchedules] = useState<UISchedule[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -100,6 +104,19 @@ const MovieDetailPage: React.FC = () => {
 
     fetchData();
   }, [id]);
+
+  const getEmbedUrl = (url: string | undefined) => {
+    if (!url) return "";
+    // Regex để lấy Video ID từ các dạng link Youtube khác nhau
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+
+    if (match && match[2].length === 11) {
+      return `https://www.youtube.com/embed/${match[2]}?autoplay=1`;
+    }
+    return url;
+  };
   const generateNext7Days = () => {
     const days: string[] = [];
     const today = new Date();
@@ -271,6 +288,7 @@ const MovieDetailPage: React.FC = () => {
                   <Button
                     size="large"
                     icon={<PlayCircleOutlined />}
+                    onClick={() => setIsModalOpen(true)}
                     className="h-14 px-8 text-xl font-bold rounded-xl text-gray-700 border-2 border-gray-300 hover:!border-blue-600 hover:!text-blue-600 transition-colors"
                   >
                     Xem Trailer
@@ -360,6 +378,62 @@ const MovieDetailPage: React.FC = () => {
             )}
           </div>
         </div>
+
+        <Modal
+          title={null}
+          open={isModalOpen}
+          onCancel={() => setIsModalOpen(false)}
+          footer={null}
+          width={900}
+          centered
+          destroyOnClose={true} // Tự động tắt video khi đóng modal
+          closeIcon={
+            <CloseOutlined
+              style={{
+                color: "white", // Icon màu trắng
+                fontSize: "24px",
+                backgroundColor: "rgba(0,0,0,0.5)", // Nền mờ cho nút
+                borderRadius: "50%",
+                padding: "8px",
+                width: "40px",
+                height: "40px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            />
+          }
+          styles={{
+            mask: { backgroundColor: "rgba(0, 0, 0, 0.9)" },
+          }}
+          bodyStyle={{ padding: 0, backgroundColor: "black" }}
+        >
+          <div
+            style={{
+              position: "relative",
+              paddingBottom: "56.25%",
+              height: 0,
+              overflow: "hidden",
+            }}
+          >
+            <iframe
+              title="Movie Trailer"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+              }}
+              src={getEmbedUrl(
+                "https://www.youtube.com/embed/-JdIsvD-C0Q?si=x2gNilyRFVc9rhfM"
+              )} // Sử dụng link trailer từ API
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </Modal>
       </Content>
       <AppFooter />
     </Layout>

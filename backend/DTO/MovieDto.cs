@@ -31,5 +31,7 @@ namespace backend.DTO
 
         [Required(ErrorMessage = "Film id is required.")]
         public string filmId { get; set; } = null!;
+
+        public string? trailer { get; set; }    
     }
 }

@@ -19,16 +19,16 @@ import {
 import {
   UserOutlined,
   HistoryOutlined,
-  LockOutlined,
   MailOutlined,
-  PhoneOutlined,
   SaveOutlined,
-  WalletOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
 import type { TabsProps } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import AppHeader from "../../components/AppHeader";
 import AppFooter from "../../components/AppFooter";
+import { reservationService } from "../../services/reservationService";
+import type { ReservationResponse } from "../../services/reservationService";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -52,56 +52,41 @@ interface BookingHistory {
   status: "success" | "pending" | "cancelled";
 }
 
-const mockHistory: BookingHistory[] = [
-  {
-    key: "1",
-    movieName: "Oppenheimer",
-    bookingDate: "10/12/2024 14:30",
-    showDate: "12/12/2024 19:00",
-    theater: "Alpha Cinema Nguyễn Du",
-    seats: "F5, F6",
-    total: 220000,
-    status: "success",
-  },
-  {
-    key: "2",
-    movieName: "Kung Fu Panda 4",
-    bookingDate: "05/12/2024 09:15",
-    showDate: "06/12/2024 20:00",
-    theater: "Alpha Cinema Thủ Đức",
-    seats: "G10, G11",
-    total: 180000,
-    status: "success",
-  },
-  {
-    key: "3",
-    movieName: "Dune: Part Two",
-    bookingDate: "01/12/2024 10:00",
-    showDate: "01/12/2024 14:00",
-    theater: "Alpha Cinema Crescent Mall",
-    seats: "E5",
-    total: 90000,
-    status: "cancelled",
-  },
-];
-
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [bookingHistory, setBookingHistory] = useState<BookingHistory[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [reservations, setReservations] = useState<ReservationResponse[]>([]);
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
-    if (userStr) {
-      const parsedUser = JSON.parse(userStr);
-      setUser({
-        ...parsedUser,
-        fullName: parsedUser.fullName || "Người dùng Alpha",
-        phone: parsedUser.phone || "0987654321",
-      });
-    } else {
+    if (!userStr) {
       navigate("/login");
+      return;
     }
+
+    const parsedUser = JSON.parse(userStr);
+    setUser({
+      ...parsedUser,
+      fullName: parsedUser.fullName || "",
+      phone: parsedUser.phone || "",
+    });
+
+    setHistoryLoading(true);
+    reservationService
+      .getReservationsByUserId(parsedUser.userId)
+      .then((res) => {
+        setReservations(res);
+        setBookingHistory(mapReservationToHistory(res));
+      })
+      .catch(() => {
+        message.error("Không thể tải lịch sử đặt vé");
+      })
+      .finally(() => {
+        setHistoryLoading(false);
+      });
   }, [navigate]);
 
   const onFinishUpdateProfile = (values: any) => {
@@ -112,11 +97,36 @@ const ProfilePage: React.FC = () => {
       const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
       localStorage.setItem(
         "user",
-        JSON.stringify({ ...currentUser, ...values })
+        JSON.stringify({ ...currentUser, ...values }),
       );
       message.success("Cập nhật thông tin thành công!");
     }, 1000);
   };
+  const mapReservationToHistory = (
+    reservations: ReservationResponse[],
+  ): BookingHistory[] => {
+    return reservations.map((r) => ({
+      key: r.id,
+      movieName: r.movieName,
+      bookingDate: new Date(r.reservationTime).toLocaleString("vi-VN"),
+      showDate: new Date(r.reservationTime).toLocaleString("vi-VN"),
+      theater: r.theaterName,
+      seats: r.seats?.map((s) => s.seatNumber).join(", ") || "",
+      total: r.totalPrice,
+      status:
+        r.statusValue === "CONFIRMED"
+          ? "success"
+          : r.statusValue === "PENDING"
+            ? "pending"
+            : "cancelled",
+    }));
+  };
+  const totalTickets = reservations
+    .filter((r) => r.statusValue === "CONFIRMED")
+    .reduce((sum, r) => sum + (r.seats?.length || 0), 0);
+  const totalSpent = reservations
+    .filter((r) => r.statusValue === "CONFIRMED")
+    .reduce((sum, r) => sum + r.totalPrice, 0);
 
   const columns: ColumnsType<BookingHistory> = [
     {
@@ -205,29 +215,6 @@ const ProfilePage: React.FC = () => {
                 />
               </Form.Item>
             </Col>
-            <Col span={24} md={12}>
-              <Form.Item
-                label="Họ và tên"
-                name="fullName"
-                rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
-              >
-                <Input placeholder="Nhập họ tên đầy đủ" />
-              </Form.Item>
-            </Col>
-            <Col span={24} md={12}>
-              <Form.Item
-                label="Số điện thoại"
-                name="phone"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số điện thoại" },
-                ]}
-              >
-                <Input
-                  prefix={<PhoneOutlined />}
-                  placeholder="Nhập số điện thoại"
-                />
-              </Form.Item>
-            </Col>
           </Row>
           <Button
             type="primary"
@@ -252,61 +239,10 @@ const ProfilePage: React.FC = () => {
       children: (
         <Table
           columns={columns}
-          dataSource={mockHistory}
+          dataSource={bookingHistory}
+          loading={historyLoading}
           pagination={{ pageSize: 5 }}
-          scroll={{ x: 700 }}
         />
-      ),
-    },
-    {
-      key: "3",
-      label: (
-        <span>
-          <LockOutlined className="mr-2" />
-          Đổi mật khẩu
-        </span>
-      ),
-      children: (
-        <Form layout="vertical" className="max-w-md">
-          <Form.Item
-            label="Mật khẩu hiện tại"
-            name="currentPassword"
-            rules={[{ required: true, message: "Nhập mật khẩu hiện tại" }]}
-          >
-            <Input.Password placeholder="••••••" />
-          </Form.Item>
-          <Form.Item
-            label="Mật khẩu mới"
-            name="newPassword"
-            rules={[
-              { required: true, message: "Nhập mật khẩu mới" },
-              { min: 6, message: "Tối thiểu 6 ký tự" },
-            ]}
-          >
-            <Input.Password placeholder="••••••" />
-          </Form.Item>
-          <Form.Item
-            label="Xác nhận mật khẩu mới"
-            name="confirmPassword"
-            dependencies={["newPassword"]}
-            rules={[
-              { required: true, message: "Xác nhận mật khẩu" },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("newPassword") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error("Mật khẩu không khớp!"));
-                },
-              }),
-            ]}
-          >
-            <Input.Password placeholder="••••••" />
-          </Form.Item>
-          <Button type="primary" htmlType="submit" className="bg-blue-600">
-            Cập nhật mật khẩu
-          </Button>
-        </Form>
       ),
     },
   ];
@@ -329,7 +265,7 @@ const ProfilePage: React.FC = () => {
                     className="bg-blue-100 text-blue-600 mb-4"
                   />
                   <Title level={4} className="mb-1">
-                    {user.fullName}
+                    {user.username}
                   </Title>
                   <Text type="secondary" className="mb-4">
                     {user.email}
@@ -339,7 +275,7 @@ const ProfilePage: React.FC = () => {
                     <Col span={12}>
                       <Statistic
                         title="Vé đã mua"
-                        value={12}
+                        value={totalTickets}
                         prefix={<HistoryOutlined />}
                         valueStyle={{ fontSize: 18 }}
                       />
@@ -347,10 +283,12 @@ const ProfilePage: React.FC = () => {
                     <Col span={12}>
                       <Statistic
                         title="Chi tiêu"
-                        value={1500000}
-                        prefix={<WalletOutlined />}
+                        value={totalSpent}
+                        prefix={<DollarOutlined />}
                         valueStyle={{ fontSize: 18 }}
-                        precision={0}
+                        formatter={(value) =>
+                          `${Number(value).toLocaleString()} đ`
+                        }
                       />
                     </Col>
                   </Row>

@@ -97,5 +97,16 @@ export const showtimeService = {
     const list = res.data?.data ?? [];
     return Array.isArray(list) ? list.map(toShowtime) : [];
   },
+    async getUpcoming(): Promise<Showtime[]> {
+    const res = await instance.get("/showtimes/upcoming");
+    const list = res.data?.data ?? [];
+    return Array.isArray(list) ? list.map(toShowtime) : [];
+  },
+
+  async getUpcomingByMovie(movieId: number): Promise<Showtime[]> {
+    const res = await instance.get(`/showtimes/upcoming/movie/${movieId}`);
+    const list = res.data?.data ?? [];
+    return Array.isArray(list) ? list.map(toShowtime) : [];
+  },
 
 };

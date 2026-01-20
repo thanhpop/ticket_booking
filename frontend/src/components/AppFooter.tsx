@@ -1,5 +1,10 @@
 import React from "react";
 import { Layout, Row, Col } from "antd";
+import {
+  FacebookFilled,
+  InstagramFilled,
+  YoutubeFilled,
+} from "@ant-design/icons";
 import logoImage from "../assets/logo-cinema2.png";
 const { Footer } = Layout;
 
@@ -23,15 +28,32 @@ const AppFooter: React.FC = () => {
               nghiệm điện ảnh chân thực và sống động nhất cho khán giả Việt.
             </p>
             <div className="flex gap-4">
-              <div className="w-10 h-10 bg-[#2b2d38] rounded-full flex items-center justify-center hover:bg-blue-600 cursor-pointer transition">
-                F
-              </div>
-              <div className="w-10 h-10 bg-[#2b2d38] rounded-full flex items-center justify-center hover:bg-blue-600 cursor-pointer transition">
-                I
-              </div>
-              <div className="w-10 h-10 bg-[#2b2d38] rounded-full flex items-center justify-center hover:bg-blue-600 cursor-pointer transition">
-                Y
-              </div>
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 bg-[#2b2d38] rounded-full flex items-center justify-center hover:bg-[#1877F2] transition-all duration-300"
+              >
+                <FacebookFilled style={{ fontSize: "25px", color: "white" }} />
+              </a>
+
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 bg-[#2b2d38] rounded-full flex items-center justify-center hover:bg-gradient-to-tr  transition-all duration-300"
+              >
+                <InstagramFilled style={{ fontSize: "25px", color: "white" }} />
+              </a>
+
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 bg-[#2b2d38] rounded-full flex items-center justify-center hover:bg-[#FF0000] transition-all duration-300"
+              >
+                <YoutubeFilled style={{ fontSize: "25px", color: "white" }} />
+              </a>
             </div>
           </Col>
 
@@ -64,14 +86,6 @@ const AppFooter: React.FC = () => {
                   Rạp & Giá Vé
                 </a>
               </li>
-              <li>
-                <a
-                  href="#"
-                  className="hover:text-blue-500 transition duration-200"
-                >
-                  Ưu Đãi Thành Viên
-                </a>
-              </li>
             </ul>
           </Col>
 
@@ -90,13 +104,13 @@ const AppFooter: React.FC = () => {
               </p>
               <p>
                 <span className="text-white font-medium">Trụ sở:</span> Tầng 5,
-                Tòa nhà Alpha, TP.HCM
+                Tòa nhà Alpha, Hà Nội
               </p>
             </div>
           </Col>
         </Row>
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500 text-sm">
-          <p>© 2024 ALPHA CINEMA Corporation. All Rights Reserved.</p>
+          <p>© 2025 ALPHA CINEMA Corporation. All Rights Reserved.</p>
         </div>
       </div>
     </Footer>

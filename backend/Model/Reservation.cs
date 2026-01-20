@@ -26,6 +26,6 @@ namespace backend.Model
         public bool Paid { get; set; }
 
         public ICollection<Seat> Seats { get; set; } = new List<Seat>();
-        public Showtime? Showtime { get; set; }
+        public Showtime Showtime { get; set; } = null!;
     }
 }

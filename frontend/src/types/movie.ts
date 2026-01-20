@@ -9,6 +9,7 @@ export interface Movie {
     poster?: string;
     imdbId?: string;
     filmId?: string;
+    trailer?: string;
 }
 
 export interface ApiMovie {

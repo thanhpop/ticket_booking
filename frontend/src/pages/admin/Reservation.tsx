@@ -9,7 +9,10 @@ import {
   Space,
   InputNumber,
   Select,
+  Modal,
+  Descriptions,
 } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { reservationService } from "../../services/reservationService";
 import type { ReservationResponse } from "../../services/reservationService";
@@ -30,6 +33,9 @@ export default function ReservationPage() {
   ]);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [paidFilter, setPaidFilter] = useState<boolean | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [selectedReservation, setSelectedReservation] =
+    useState<ReservationResponse | null>(null);
 
   useEffect(() => {
     fetchReservations();
@@ -76,18 +82,17 @@ export default function ReservationPage() {
     return true;
   });
 
+  const handleViewDetail = (record: ReservationResponse) => {
+    setSelectedReservation(record);
+    setOpenDetail(true);
+  };
+
   const columns: ColumnsType<ReservationResponse> = [
     {
       title: "ID đơn đặt",
       dataIndex: "id",
       key: "id",
       width: 220,
-    },
-    {
-      title: "ID Người dùng",
-      dataIndex: "userId",
-      key: "userId",
-      width: 100,
     },
     {
       title: " ID Suất chiếu ",
@@ -134,6 +139,17 @@ export default function ReservationPage() {
         ) : (
           <Tag color="red">Chưa thanh toán</Tag>
         ),
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      width: 100,
+      render: (_, record) => (
+        <EyeOutlined
+          style={{ fontSize: 18, cursor: "pointer", color: "#1677ff" }}
+          onClick={() => handleViewDetail(record)}
+        />
+      ),
     },
   ];
 
@@ -204,6 +220,77 @@ export default function ReservationPage() {
           }}
         />
       </Spin>
+      <Modal
+        title="Chi tiết đơn đặt vé"
+        open={openDetail}
+        onCancel={() => setOpenDetail(false)}
+        footer={null}
+        width={600}
+      >
+        {selectedReservation && (
+          <Descriptions bordered column={1} size="small">
+            <Descriptions.Item label="ID đơn">
+              {selectedReservation.id}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="ID người dùng">
+              {selectedReservation.userId}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="ID suất chiếu">
+              {selectedReservation.showtimeId}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Thời gian đặt">
+              {dayjs(selectedReservation.reservationTime).format(
+                "DD/MM/YYYY HH:mm:ss",
+              )}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Trạng thái">
+              <Tag
+                color={
+                  selectedReservation.statusValue === "CONFIRMED"
+                    ? "green"
+                    : selectedReservation.statusValue === "PENDING"
+                      ? "orange"
+                      : "red"
+                }
+              >
+                {selectedReservation.statusValue}
+              </Tag>
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Tổng tiền">
+              {selectedReservation.totalPrice.toLocaleString("vi-VN")} đ
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Thanh toán">
+              {selectedReservation.paid ? (
+                <Tag color="green">Đã thanh toán</Tag>
+              ) : (
+                <Tag color="red">Chưa thanh toán</Tag>
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ghế đã đặt">
+              {selectedReservation.seats?.length ? (
+                <Space wrap>
+                  {selectedReservation.seats.map((seat) => (
+                    <Tag
+                      key={seat.id}
+                      color={seat.isReserved ? "blue" : "default"}
+                    >
+                      {seat.seatNumber}
+                    </Tag>
+                  ))}
+                </Space>
+              ) : (
+                <Tag color="default">Không có ghế</Tag>
+              )}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Modal>
     </div>
   );
 }

@@ -37,5 +37,8 @@ namespace backend.Model
         [Column("film_id")]
         public required string filmId { get; set; }
 
+        [Column("trailer")]
+        public string? trailer { get; set; }
+
     }
 }

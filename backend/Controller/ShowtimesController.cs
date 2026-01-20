@@ -2,6 +2,7 @@
 using backend.DTO;
 using backend.Helpers;
 using backend.Service.Interfaces;
+using backend.Services.Implementations;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -76,6 +77,20 @@ namespace backend.Controllers
             var searchDate = (date ?? DateTime.Today).Date;
             var items = await _service.GetAvailableShowtimesForMovieAsync(movieId, searchDate);
             return Ok(new ApiResponse<IEnumerable<ShowtimeDto>>(200, "Success", items));
+        }
+
+        [HttpGet("upcoming")]
+        public async Task<IActionResult> GetUpcoming()
+        {
+            var items = await _service.GetUpcomingShowtimesAsync();
+            return Ok(ApiResponse<IEnumerable<ShowtimeDto>>.Success(items));
+        }
+
+        [HttpGet("upcoming/movie/{movieId:long}")]
+        public async Task<IActionResult> GetUpcomingByMovie(long movieId)
+        {
+            var items = await _service.GetUpcomingShowtimesByMovieAsync(movieId);
+            return Ok(ApiResponse<IEnumerable<ShowtimeDto>>.Success(items));
         }
 
         [HttpPost]

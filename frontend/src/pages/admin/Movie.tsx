@@ -62,6 +62,7 @@ const MovieSchema = z.object({
     message: "releaseDate phải là chuỗi ISO hợp lệ",
   }),
   poster: z.url("Poster phải là URL hợp lệ").optional(),
+  trailer: z.url("Trailer phải là URL hợp lệ").optional(),
   imdbId: z.string().optional(),
   filmId: z.string().optional(),
 });
@@ -91,7 +92,7 @@ const MoviePage: React.FC = () => {
   };
 
   const filtered = movies.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase())
+    item.title.toLowerCase().includes(search.toLowerCase()),
   );
 
   useEffect(() => {
@@ -129,6 +130,7 @@ const MoviePage: React.FC = () => {
       language: record.language,
       releaseDate: moment(record.releaseDate, "DD/MM/YYYY"),
       poster: record.poster,
+      trailer: record.trailer ?? undefined,
       imdbId: record.imdbId ?? undefined,
       filmId: record.filmId ?? undefined,
     });
@@ -145,6 +147,7 @@ const MoviePage: React.FC = () => {
       language: record.language,
       releaseDate: moment(record.releaseDate, "DD/MM/YYYY"),
       poster: record.poster,
+      trailer: record.trailer ?? undefined,
       imdbId: record.imdbId ?? undefined,
       filmId: record.filmId ?? undefined,
     });
@@ -177,7 +180,7 @@ const MoviePage: React.FC = () => {
 
       // sanitize genres by removing any leading 'phim' prefix before saving
       const sanitizedGenres: string[] = (values.genres || []).map((g: any) =>
-        normalizeGenre(String(g))
+        normalizeGenre(String(g)),
       );
 
       const payload: Omit<Movie, "id"> = {
@@ -188,12 +191,12 @@ const MoviePage: React.FC = () => {
         language: values.language,
         releaseDate: releaseIso,
         poster: values.poster || undefined,
+        trailer: values.trailer || undefined,
         imdbId: values.imdbId || undefined,
         filmId: values.filmId || undefined,
       };
 
-      // validate payload with zod (optional)
-      const idNum = editingId ?? Date.now(); // number
+      const idNum = editingId ?? Date.now();
       const candidate = { id: Number(idNum), ...payload };
       const parsed = MovieSchema.safeParse(candidate);
       if (!parsed.success) {
@@ -238,7 +241,7 @@ const MoviePage: React.FC = () => {
     if (!value) return setApiResults([]);
     try {
       const endpoint = `${apiUrl}/search/movie?query=${encodeURIComponent(
-        value
+        value,
       )}&language=vi-VN&page=1`;
       const res = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${apiKey}` },
@@ -257,6 +260,32 @@ const MoviePage: React.FC = () => {
       setApiResults([]);
     }
   };
+  const fetchTrailerFromTmdb = async (
+    movieId: number,
+  ): Promise<string | undefined> => {
+    try {
+      const res = await axios.get(`${apiUrl}/movie/${movieId}/videos`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+
+      const videos = res.data?.results || [];
+
+      // Ưu tiên: Official YouTube Trailer
+      const trailer =
+        videos.find(
+          (v: any) =>
+            v.site === "YouTube" && v.type === "Trailer" && v.official === true,
+        ) ||
+        videos.find((v: any) => v.site === "YouTube" && v.type === "Trailer");
+
+      if (!trailer?.key) return undefined;
+
+      return `https://www.youtube.com/watch?v=${trailer.key}`;
+    } catch (e) {
+      console.error("Fetch trailer error", e);
+      return undefined;
+    }
+  };
 
   const handleApiSelect = async (item: ApiMovie) => {
     try {
@@ -264,8 +293,9 @@ const MoviePage: React.FC = () => {
         `${apiUrl}/movie/${item.id}?language=vi-VN`,
         {
           headers: { Authorization: `Bearer ${apiKey}` },
-        }
+        },
       );
+      const trailerUrl = await fetchTrailerFromTmdb(item.id);
       const details = detailsRes.data;
 
       const runtime: number | undefined = details.runtime;
@@ -302,6 +332,7 @@ const MoviePage: React.FC = () => {
           : undefined,
         imdbId: imdbFromTmdb,
         filmId: filmIdFromTmdb,
+        trailer: trailerUrl,
       });
     } catch (e) {
       console.error("Movie details fetch error", e);
@@ -561,6 +592,18 @@ const MoviePage: React.FC = () => {
               <Form.Item label="Film ID" name="filmId">
                 <Input placeholder="" />
               </Form.Item>
+              <Form.Item
+                label="Trailer (YouTube URL)"
+                name="trailer"
+                rules={[
+                  {
+                    type: "url",
+                    message: "Trailer phải là URL hợp lệ",
+                  },
+                ]}
+              >
+                <Input placeholder="https://www.youtube.com/watch?v=..." />
+              </Form.Item>
             </Col>
           </Row>
         </Form>
@@ -684,6 +727,28 @@ const MoviePage: React.FC = () => {
                   value={viewForm.getFieldValue("filmId") || ""}
                 />
               </Form.Item>
+              <Form.Item label="Trailer">
+                <Input
+                  readOnly
+                  value={viewForm.getFieldValue("trailer") || ""}
+                />
+              </Form.Item>
+
+              {viewForm.getFieldValue("trailer") && (
+                <div style={{ marginTop: 12 }}>
+                  <iframe
+                    width="100%"
+                    height="315"
+                    src={viewForm
+                      .getFieldValue("trailer")
+                      .replace("watch?v=", "embed/")}
+                    title="Trailer"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ borderRadius: 8 }}
+                  />
+                </div>
+              )}
             </Col>
           </Row>
         </Form>

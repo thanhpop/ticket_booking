@@ -42,6 +42,7 @@ namespace backend.Services.Implementations
             existing.releaseDate = movie.releaseDate;
             existing.imdbId = movie.imdbId;
             existing.filmId = movie.filmId;
+            existing.trailer = movie.trailer;   
 
             await _db.SaveChangesAsync();
             return existing;

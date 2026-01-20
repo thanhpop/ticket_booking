@@ -30,6 +30,8 @@ namespace backend.Model
 
         [Column("available_seats")]
         public int AvailableSeats { get; set; }
+        public Movie Movie { get; set; } = null!;
+        public Theater Theater { get; set; } = null!;
 
 
         public virtual ICollection<Seat> Seats { get; set; } = new List<Seat>();

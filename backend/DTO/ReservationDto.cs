@@ -10,6 +10,9 @@
         public string StatusValue { get; set; } = string.Empty;
         public decimal TotalPrice { get; set; }
         public bool Paid { get; set; }
+
+        public string? MovieName { get; set; }
+        public string? TheaterName { get; set; }
         public List<SeatDto> Seats { get; set; } = new List<SeatDto>();
     }
 }

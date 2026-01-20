@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Layout, Button, Carousel, Tabs, Card } from "antd";
+import { Layout, Button, Carousel, Tabs, Card, Modal, message } from "antd";
 import { PlayCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import type { TabsProps } from "antd";
 import AppHeader from "../../components/AppHeader";
@@ -19,6 +19,7 @@ interface HomeMovie {
   image: string;
   genre: string;
   duration: string;
+  trailer?: string;
 }
 
 interface BannerData {
@@ -26,8 +27,6 @@ interface BannerData {
   image: string;
   title: string;
 }
-
-const comingSoon: HomeMovie[] = [];
 
 const banners: BannerData[] = [
   {
@@ -67,9 +66,24 @@ const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
   isComingSoon,
 }) => {
   const navigate = useNavigate();
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const handleDetailClick = () => {
     navigate(`/movie/${movie.id}`);
+  };
+  const getEmbedUrl = (url?: string) => {
+    if (!url) return "";
+    const videoId = url.includes("youtube.com")
+      ? new URL(url).searchParams.get("v")
+      : url.split("/").pop();
+
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+  };
+  const handleTrailerClick = () => {
+    if (!movie.trailer) {
+      message.warning("Phim chưa có trailer");
+      return;
+    }
+    setIsModalOpen(true);
   };
 
   return (
@@ -99,14 +113,16 @@ const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
               {isComingSoon ? "Xem Trailer" : "Mua Vé"}
             </Button>
 
-            <Button
-              shape="round"
-              icon={<InfoCircleOutlined />}
-              onClick={handleDetailClick}
-              className="opacity-0 group-hover:opacity-100 bg-transparent text-white border-2 border-white hover:!bg-white hover:!text-black hover:!border-white font-bold shadow-lg min-w-[140px] transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75"
-            >
-              Chi Tiết
-            </Button>
+            {!isComingSoon && (
+              <Button
+                shape="round"
+                icon={<InfoCircleOutlined />}
+                onClick={handleDetailClick}
+                className="opacity-0 group-hover:opacity-100 bg-transparent text-white border-2 border-white hover:!bg-white hover:!text-black hover:!border-white font-bold shadow-lg min-w-[140px] transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75"
+              >
+                Chi Tiết
+              </Button>
+            )}
           </div>
         </div>
       }
@@ -129,12 +145,40 @@ const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
           </div>
         }
       />
+      <Modal
+        title={null}
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+        width={900}
+        centered
+        destroyOnClose
+        bodyStyle={{ padding: 0, backgroundColor: "black" }}
+      >
+        <div
+          style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}
+        >
+          <iframe
+            title="Movie Trailer"
+            src={getEmbedUrl(movie.trailer)}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      </Modal>
     </Card>
   );
 };
 
 const HomePage: React.FC = () => {
   const [nowShowing, setNowShowing] = useState<HomeMovie[]>([]);
+  const [comingSoonMovies, setComingSoonMovies] = useState<HomeMovie[]>([]);
 
   useEffect(() => {
     const loadNowShowing = async () => {
@@ -158,6 +202,7 @@ const HomePage: React.FC = () => {
           image: m.poster || "https://placehold.co/400x600?text=No+Image",
           genre: m.genres?.join(", ") || "N/A",
           duration: m.duration ? `${m.duration} phút` : "N/A",
+          trailer: m.trailer,
         }));
 
         setNowShowing(mapped);
@@ -169,6 +214,40 @@ const HomePage: React.FC = () => {
     };
 
     loadNowShowing();
+  }, []);
+
+  useEffect(() => {
+    const loadComingSoon = async () => {
+      try {
+        const upcomingShowtimes = await showtimeService.getUpcoming();
+
+        const movieIdSet = new Set(upcomingShowtimes.map((s) => s.movieId));
+
+        if (movieIdSet.size === 0) {
+          setComingSoonMovies([]);
+          return;
+        }
+
+        const allMovies = await movieService.getMovies();
+
+        const comingMovies = allMovies.filter((m) => movieIdSet.has(m.id));
+
+        const mapped: HomeMovie[] = comingMovies.map((m) => ({
+          id: m.id,
+          title: m.title,
+          image: m.poster || "https://placehold.co/400x600?text=No+Image",
+          genre: m.genres?.join(", ") || "N/A",
+          duration: m.duration ? `${m.duration} phút` : "N/A",
+        }));
+
+        setComingSoonMovies(mapped);
+      } catch (err) {
+        console.error("Load coming soon failed", err);
+        setComingSoonMovies([]);
+      }
+    };
+
+    loadComingSoon();
   }, []);
 
   const tabItems: TabsProps["items"] = [
@@ -188,7 +267,7 @@ const HomePage: React.FC = () => {
       label: <span className="text-lg font-bold px-6">PHIM SẮP CHIẾU</span>,
       children: (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 py-4">
-          {comingSoon.map((movie) => (
+          {comingSoonMovies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} isComingSoon />
           ))}
         </div>

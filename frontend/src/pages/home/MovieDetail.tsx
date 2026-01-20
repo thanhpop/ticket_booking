@@ -72,10 +72,13 @@ const MovieDetailPage: React.FC = () => {
 
         setMovie(movieData);
 
-        const theaterMapData = theatersData.reduce((acc, t) => {
-          acc[t.id] = t;
-          return acc;
-        }, {} as Record<number, Theater>);
+        const theaterMapData = theatersData.reduce(
+          (acc, t) => {
+            acc[t.id] = t;
+            return acc;
+          },
+          {} as Record<number, Theater>,
+        );
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -90,7 +93,7 @@ const MovieDetailPage: React.FC = () => {
 
         const processedData = processShowtimesToSchedule(
           filteredShowtimes,
-          theaterMapData
+          theaterMapData,
         );
 
         setSchedules(processedData);
@@ -107,7 +110,6 @@ const MovieDetailPage: React.FC = () => {
 
   const getEmbedUrl = (url: string | undefined) => {
     if (!url) return "";
-    // Regex để lấy Video ID từ các dạng link Youtube khác nhau
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
@@ -159,7 +161,7 @@ const MovieDetailPage: React.FC = () => {
 
   const processShowtimesToSchedule = (
     showtimes: Showtime[],
-    theaters: Record<number, Theater>
+    theaters: Record<number, Theater>,
   ): UISchedule[] => {
     const days = generateNext7Days();
 
@@ -386,13 +388,13 @@ const MovieDetailPage: React.FC = () => {
           footer={null}
           width={900}
           centered
-          destroyOnClose={true} // Tự động tắt video khi đóng modal
+          destroyOnClose={true}
           closeIcon={
             <CloseOutlined
               style={{
-                color: "white", // Icon màu trắng
+                color: "white",
                 fontSize: "24px",
-                backgroundColor: "rgba(0,0,0,0.5)", // Nền mờ cho nút
+                backgroundColor: "rgba(0,0,0,0.5)",
                 borderRadius: "50%",
                 padding: "8px",
                 width: "40px",
@@ -404,7 +406,7 @@ const MovieDetailPage: React.FC = () => {
             />
           }
           styles={{
-            mask: { backgroundColor: "rgba(0, 0, 0, 0.9)" },
+            mask: { backgroundColor: "rgba(0, 0, 0, 0.7)" },
           }}
           bodyStyle={{ padding: 0, backgroundColor: "black" }}
         >
@@ -425,9 +427,7 @@ const MovieDetailPage: React.FC = () => {
                 width: "100%",
                 height: "100%",
               }}
-              src={getEmbedUrl(
-                "https://www.youtube.com/embed/-JdIsvD-C0Q?si=x2gNilyRFVc9rhfM"
-              )} // Sử dụng link trailer từ API
+              src={getEmbedUrl(movie.trailer)}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen

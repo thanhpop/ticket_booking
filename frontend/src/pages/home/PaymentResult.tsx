@@ -57,15 +57,13 @@ export default function PaymentResult(): JSX.Element {
       try {
         if (success) {
           await paymentService.confirmReservation(qp.txnRef);
-          // message.success("Thanh toán & giữ ghế thành công");
         } else {
           await reservationService.cancelReservation(qp.txnRef);
-          // message.error("Thanh toán thất bại, ghế đã được hủy");
         }
       } catch (err: any) {
         console.error(err);
         message.error(
-          err?.response?.data?.message || "Có lỗi xảy ra khi xử lý giao dịch"
+          err?.response?.data?.message || "Có lỗi xảy ra khi xử lý giao dịch",
         );
       }
     };

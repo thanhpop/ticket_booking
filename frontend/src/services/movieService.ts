@@ -29,6 +29,7 @@ function toMovie(m: any): Movie {
         poster: m.poster ?? m.poster_path,
         imdbId: imdbId ?? undefined,
         filmId: filmId ?? undefined,
+        trailer: m.trailer ?? undefined,
     };
 }
 function formatReleaseForApi(release?: string): string | undefined {

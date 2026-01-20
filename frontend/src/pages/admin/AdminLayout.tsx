@@ -4,8 +4,10 @@ import type { MenuProps } from "antd";
 import {
   VideoCameraOutlined,
   LogoutOutlined,
-  ShoppingCartOutlined,
+  HomeOutlined,
   CalendarOutlined,
+  ProfileOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import logo from "../../assets/logo-cinema2.png";
@@ -23,7 +25,7 @@ const AdminLayout: React.FC = () => {
       },
       {
         key: "/admin/theater",
-        icon: <ShoppingCartOutlined />,
+        icon: <HomeOutlined />,
         label: <Link to="/admin/theater">Rạp chiếu</Link>,
       },
       {
@@ -33,12 +35,12 @@ const AdminLayout: React.FC = () => {
       },
       {
         key: "/admin/reservations",
-        icon: <CalendarOutlined />,
+        icon: <ProfileOutlined />,
         label: <Link to="/admin/reservations">Đơn đặt</Link>,
       },
       {
         key: "/admin/users",
-        icon: <CalendarOutlined />,
+        icon: <UserOutlined />,
         label: <Link to="/admin/users">Tài khoản</Link>,
       },
     ],

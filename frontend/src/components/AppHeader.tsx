@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Menu, Button } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { LogoutOutlined } from "@ant-design/icons";
 import logoImage from "../assets/logo2.png";
 
@@ -16,6 +16,7 @@ interface StoredUser {
 
 const AppHeader: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState<StoredUser | null>(null);
 
   useEffect(() => {
@@ -33,6 +34,13 @@ const AppHeader: React.FC = () => {
     localStorage.removeItem("user");
     setUser(null);
     navigate("/login");
+  };
+
+  const getSelectedKey = () => {
+    const path = location.pathname;
+    if (path.startsWith("/news")) return ["news"];
+    if (path === "/") return ["home"];
+    return [];
   };
 
   return (
@@ -54,14 +62,16 @@ const AppHeader: React.FC = () => {
 
         <Menu
           mode="horizontal"
-          defaultSelectedKeys={["home"]}
+          selectedKeys={getSelectedKey()}
           style={{ background: "transparent", borderBottom: "none" }}
           className="hidden md:flex min-w-[300px] text-base font-medium"
           items={[
             { key: "home", label: "Trang Chủ", onClick: () => navigate("/") },
-            { key: "movies", label: "Lịch Chiếu" },
-            { key: "theaters", label: "Cụm Rạp" },
-            { key: "news", label: "Tin Tức" },
+            {
+              key: "news",
+              label: "Tin Tức và ưu đãi",
+              onClick: () => navigate("/news"),
+            },
           ]}
         />
       </div>

@@ -260,6 +260,8 @@ namespace backend.Service.Implementations
                     StatusValue = MapStatus(r.StatusId),
                     TotalPrice = r.TotalPrice,
                     Paid = r.Paid,
+                    MovieName = r.Showtime.Movie.title,
+                    TheaterName = r.Showtime.Theater.name,
                     Seats = r.Seats.Select(s => new SeatDto
                     {
                         Id = s.Id,

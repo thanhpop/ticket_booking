@@ -166,12 +166,18 @@ namespace backend.Services.Implementations
 
         public async Task<IEnumerable<ShowtimeDto>> GetAvailableShowtimesAsync(DateTime? fromDate = null)
         {
-            var date = (fromDate ?? DateTime.Today).Date;
+            var startDate = (fromDate ?? DateTime.Today).Date;
+            var endDate = startDate.AddDays(7);
 
             var list = await _db.Showtimes
                 .AsNoTracking()
-                .Where(s => s.ShowDate >= date && s.AvailableSeats > 0).Include(x => x.Seats)
-                .OrderBy(s => s.ShowDate).ThenBy(s => s.ShowTime)
+                .Where(s =>
+                    s.ShowDate >= startDate &&
+                    s.ShowDate <= endDate &&
+                    s.AvailableSeats > 0
+                )
+                .OrderBy(s => s.ShowDate)
+                .ThenBy(s => s.ShowTime)
                 .Select(s => new ShowtimeDto
                 {
                     Id = s.Id,
@@ -182,7 +188,6 @@ namespace backend.Services.Implementations
                     Price = s.Price,
                     TotalSeats = s.TotalSeats,
                     AvailableSeats = s.AvailableSeats
-
                 })
                 .ToListAsync();
 
@@ -213,6 +218,65 @@ namespace backend.Services.Implementations
 
             return list;
         }
+
+        public async Task<IEnumerable<ShowtimeDto>> GetUpcomingShowtimesAsync()
+        {
+            var fromDate = DateTime.Today.AddDays(8);
+
+            var list = await _db.Showtimes
+                .AsNoTracking()
+                .Where(s => s.ShowDate >= fromDate)
+                .OrderBy(s => s.ShowDate)
+                .ThenBy(s => s.ShowTime)
+                .Select(s => new ShowtimeDto
+                {
+                    Id = s.Id,
+                    MovieId = s.MovieId,
+                    TheaterId = s.TheaterId,
+                    ShowDate = s.ShowDate,
+                    ShowTime = s.ShowTime.ToString(@"hh\:mm"),
+                    Price = s.Price,
+                    TotalSeats = s.TotalSeats,
+                    AvailableSeats = s.AvailableSeats
+                })
+                .ToListAsync();
+
+            return list;
+        }
+        public async Task<IEnumerable<ShowtimeDto>> GetUpcomingShowtimesByMovieAsync(long movieId)
+        {
+            var now = DateTime.Now;
+            var today = now.Date;
+            var currentTime = now.TimeOfDay;
+
+            var list = await _db.Showtimes
+                .AsNoTracking()
+                .Where(s =>
+                    s.MovieId == movieId &&
+                    (
+                        s.ShowDate > today ||
+                        (s.ShowDate == today && s.ShowTime > currentTime)
+                    )
+                )
+                .OrderBy(s => s.ShowDate)
+                .ThenBy(s => s.ShowTime)
+                .Select(s => new ShowtimeDto
+                {
+                    Id = s.Id,
+                    MovieId = s.MovieId,
+                    TheaterId = s.TheaterId,
+                    ShowDate = s.ShowDate,
+                    ShowTime = s.ShowTime.ToString(@"hh\:mm"),
+                    Price = s.Price,
+                    TotalSeats = s.TotalSeats,
+                    AvailableSeats = s.AvailableSeats
+                })
+                .ToListAsync();
+
+            return list;
+        }
+
+
         public async Task<ShowtimeDto> CreateAsync(ShowtimeDto dto)
         {
             var movieExists = await _db.Movies.AnyAsync(m => m.id == dto.MovieId);

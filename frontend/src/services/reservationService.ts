@@ -1,5 +1,13 @@
 import instance from "../config/axios";
 
+export interface SeatResponse {
+  id: number;
+  showtimeId: number;
+  seatNumber: string;
+  isReserved: boolean;
+}
+
+
 export interface CreateReservationRequest {
   userId: number;
   showtimeId: number;
@@ -15,6 +23,9 @@ export interface ReservationResponse {
   statusValue: string;
   totalPrice: number;
   paid: boolean;
+  movieName: string;
+  theaterName: string;
+  seats?: SeatResponse[];
 }
 
 export const reservationService = {
@@ -31,5 +42,11 @@ export const reservationService = {
     getAllReservations: async (): Promise<ReservationResponse[]> => {
     const res = await instance.get("/reservation");
     return res.data;
+  },
+    getReservationsByUserId: async (
+    userId: number
+  ): Promise<ReservationResponse[]> => {
+    const res = await instance.get(`/reservation/user/${userId}`);
+    return res.data.data;
   },
 };

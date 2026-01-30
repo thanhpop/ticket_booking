@@ -9,6 +9,8 @@ import AppFooter from "../../components/AppFooter";
 import { useEffect } from "react";
 import { showtimeService } from "../../services/showtimeService";
 import movieService from "../../services/movieService";
+import type { Banner } from "../../types/Banner";
+import { bannerService } from "../../services/bannerService";
 
 const { Content } = Layout;
 const { Meta } = Card;
@@ -21,45 +23,6 @@ interface HomeMovie {
   duration: string;
   trailer?: string;
 }
-
-interface BannerData {
-  id: number;
-  image: string;
-  title: string;
-}
-
-const banners: BannerData[] = [
-  {
-    id: 1,
-    image:
-      "https://cdn.galaxycine.vn/media/2025/12/6/2048x682_1765021503814.jpg",
-    title: "ĐẠI CHIẾN HÀNH TINH KHỈ",
-  },
-  {
-    id: 2,
-    image:
-      "https://cdn.galaxycine.vn/media/2025/11/3/glx-2048x682_1762159408722.jpg",
-    title: "MOANA 2: HÀNH TRÌNH MỚI",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop",
-    title: "KUNG FU PANDA 4",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=2070&auto=format&fit=crop",
-    title: "DUNE: HÀNH TINH CÁT",
-  },
-  {
-    id: 5,
-    image:
-      "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop",
-    title: "ALPHA CINEMA PREMIERE",
-  },
-];
 
 const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
   movie,
@@ -179,6 +142,7 @@ const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
 const HomePage: React.FC = () => {
   const [nowShowing, setNowShowing] = useState<HomeMovie[]>([]);
   const [comingSoonMovies, setComingSoonMovies] = useState<HomeMovie[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
 
   useEffect(() => {
     const loadNowShowing = async () => {
@@ -250,6 +214,25 @@ const HomePage: React.FC = () => {
     loadComingSoon();
   }, []);
 
+  useEffect(() => {
+    const loadBanners = async () => {
+      try {
+        const res = await bannerService.getActive();
+
+        const activeBanners = res.data.data
+          .filter((b) => b.isActive)
+          .sort((a, b) => a.displayOrder - b.displayOrder);
+
+        setBanners(activeBanners);
+      } catch (err) {
+        console.error("Load banner failed", err);
+        setBanners([]);
+      }
+    };
+
+    loadBanners();
+  }, []);
+
   const tabItems: TabsProps["items"] = [
     {
       key: "1",
@@ -281,19 +264,14 @@ const HomePage: React.FC = () => {
 
       <Content>
         <div className="relative">
-          <Carousel
-            autoplay
-            effect="fade"
-            autoplaySpeed={5000}
-            className="bg-black"
-          >
+          <Carousel autoplay effect="fade" autoplaySpeed={5000}>
             {banners.map((banner) => (
               <div
                 key={banner.id}
-                className="h-[300px] md:h-[550px] w-full relative"
+                className="h-[400px] md:h-[550px] w-full relative"
               >
                 <img
-                  src={banner.image}
+                  src={banner.imageUrl}
                   alt={banner.title}
                   className="w-full h-full object-cover"
                 />

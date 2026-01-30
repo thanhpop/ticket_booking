@@ -43,7 +43,7 @@ namespace backend.Controller
         {
             var res = await _auth.RefreshTokenAsync(dto.RefreshToken);
             if (res == null) return Unauthorized(new { message = "Invalid or expired refresh token" });
-            return Ok(ApiResponse<JwtResponseDto>.Success(res));
+            return Ok(ApiResponse<RefreshTokenResponseDto>.Success(res));
         }
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshRequestDto dto)

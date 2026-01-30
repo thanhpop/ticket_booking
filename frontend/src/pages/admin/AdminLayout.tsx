@@ -8,6 +8,8 @@ import {
   CalendarOutlined,
   ProfileOutlined,
   UserOutlined,
+  PictureOutlined,
+  ReadOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import logo from "../../assets/logo-cinema2.png";
@@ -43,13 +45,23 @@ const AdminLayout: React.FC = () => {
         icon: <UserOutlined />,
         label: <Link to="/admin/users">Tài khoản</Link>,
       },
+      {
+        key: "/admin/banner",
+        icon: <PictureOutlined />,
+        label: <Link to="/admin/banner">Banner</Link>,
+      },
+      {
+        key: "/admin/news",
+        icon: <ReadOutlined />,
+        label: <Link to="/admin/news">Bài viết</Link>,
+      },
     ],
-    []
+    [],
   );
 
   const selected =
     items.find(
-      (i) => typeof i?.key === "string" && pathname.startsWith(String(i.key))
+      (i) => typeof i?.key === "string" && pathname.startsWith(String(i.key)),
     )?.key ?? items[0]?.key;
 
   const siderWidth = 250;

@@ -16,6 +16,9 @@ import ReservationPage from "../pages/admin/Reservation.tsx";
 import ProfilePage from "../pages/home/ProfilePage.tsx";
 import UserManagementPage from "../pages/admin/User.tsx";
 import NewsPage from "../pages/home/NewsPage.tsx";
+import BannerPage from "../pages/admin/Banner.tsx";
+import NewsManagementPage from "../pages/admin/News.tsx";
+import NewsDetailPage from "../pages/home/NewsDetailPage.tsx";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -26,6 +29,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/booking/:showtimeId" element={<BookingPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/news" element={<NewsPage />} />
+      <Route path="/news/:id" element={<NewsDetailPage />} />
       <Route path="/paymentResult" element={<PaymentResult />} />
       <Route path="/admin" element={<AdminLayout />}>
         <Route path="movie" element={<MoviePage />} />
@@ -33,6 +37,8 @@ const AppRoutes: React.FC = () => {
         <Route path="showtime" element={<Showtime />} />
         <Route path="reservations" element={<ReservationPage />} />
         <Route path="users" element={<UserManagementPage />} />
+        <Route path="banner" element={<BannerPage />} />
+        <Route path="news" element={<NewsManagementPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

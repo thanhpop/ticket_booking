@@ -102,7 +102,7 @@ namespace backend.Service.Implementations
             return Base64UrlEncoder.Encode(bytes);
         }
 
-        public async Task<JwtResponseDto?> RefreshTokenAsync(string refreshToken)
+        public async Task<RefreshTokenResponseDto?> RefreshTokenAsync(string refreshToken)
         {
             if (string.IsNullOrWhiteSpace(refreshToken)) return null;
 
@@ -124,30 +124,15 @@ namespace backend.Service.Implementations
         .FirstOrDefaultAsync(u => u.id == refresh.UserId);
             if (user == null)
             {
-                _db.RefreshTokens.Remove(refresh);
-                await _db.SaveChangesAsync();
                 return null;
             }
-            var newRefreshToken = GenerateRefreshToken();
-            refresh.Token = newRefreshToken;
-            refresh.ExpiryDate = DateTime.UtcNow.AddDays(_refreshTokenDays);
-            refresh.UpdatedAt = DateTime.UtcNow;
 
-            _db.RefreshTokens.Update(refresh);
-            await _db.SaveChangesAsync();
+            var (accessToken, _) = CreateJwtToken(user);
 
-            var (accessToken, expire) = CreateJwtToken(user);
-
-            var resp = new JwtResponseDto
+            return new RefreshTokenResponseDto
             {
-                AccessToken = accessToken,
-                UserId = user.id,
-                Username = user.username,
-                Email = user.email,
-                RefreshToken = newRefreshToken,
+                AccessToken = accessToken
             };
-
-            return resp;
         }
 
 

@@ -20,6 +20,8 @@ namespace backend.Extensions
             services.AddScoped<IVnPayService, VnPayService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IReservationService, ReservationService>();
+            services.AddScoped<IBannerService, BannerService>();
+            services.AddScoped<INewsService, NewsService>();
             return services;
         }
     }

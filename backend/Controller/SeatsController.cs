@@ -12,12 +12,34 @@ namespace backend.Controllers
     {
         private readonly ISeatService _service;
         private readonly ILogger<SeatsController> _logger;
+        private readonly SeatSessionService _seatSessionService;
 
-        public SeatsController(ISeatService service, ILogger<SeatsController> logger)
+        public SeatsController(
+    ISeatService service,
+    ILogger<SeatsController> logger,
+    SeatSessionService seatSessionService)
+{
+    _service = service;
+    _logger = logger;
+    _seatSessionService = seatSessionService;
+}
+        [HttpGet("showtime/{showtimeId:long}/status")]
+        public async Task<IActionResult> GetSeatStatus(long showtimeId)
         {
-            _service = service;
-            _logger = logger;
+            //var seats = await _service.GetByShowtimeAsync(showtimeId);
+
+            var holdSeats = await _seatSessionService
+                .GetAllHoldSeatsByShowtime(showtimeId);
+
+            //var result = new
+            //{
+            //    seats,
+            //    holdSeats
+            //};
+
+            return Ok(holdSeats);
         }
+
 
         [HttpGet("showtime/{showtimeId:long}")]
         public async Task<IActionResult> GetByShowtime(long showtimeId)

@@ -1,13 +1,10 @@
-﻿using backend.Model;
+﻿using backend.DTO;
 
-namespace backend.Service.Interfaces
+public interface IMovieService
 {
-    public interface IMovieService
-    {
-        Task<IEnumerable<Movie>> GetAllAsync();
-        Task<Movie?> GetByIdAsync(long id);
-        Task<long> CreateAsync(Movie movie);
-        Task<Movie?> UpdateAsync(long id, Movie movie);
-        Task<bool> DeleteAsync(long id);
-    }
+    Task<IEnumerable<MovieDto>> GetAllAsync();
+    Task<MovieDto?> GetByIdAsync(long id);
+    Task<MovieDto> CreateAsync(MovieDto dto);
+    Task<MovieDto?> UpdateAsync(long id, MovieDto dto);
+    Task<bool> DeleteAsync(long id);
 }

@@ -41,13 +41,6 @@ const MovieCard: React.FC<{ movie: HomeMovie; isComingSoon?: boolean }> = ({
 
     return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
   };
-  const handleTrailerClick = () => {
-    if (!movie.trailer) {
-      message.warning("Phim chưa có trailer");
-      return;
-    }
-    setIsModalOpen(true);
-  };
 
   return (
     <Card

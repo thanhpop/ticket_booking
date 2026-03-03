@@ -348,7 +348,7 @@ namespace backend.Services.Implementations
         public async Task<ShowtimeDto?> UpdateAsync(long id, ShowtimeDto dto)
         {
             var existing = await _db.Showtimes
-                                    .Include(s => s.Seats) // nếu cần trả kèm seats
+                                    .Include(s => s.Seats) 
                                     .FirstOrDefaultAsync(s => s.Id == id);
 
             var theater = await _db.Theaters.FirstOrDefaultAsync(t => t.id == dto.TheaterId);

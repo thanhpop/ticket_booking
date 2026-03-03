@@ -16,7 +16,6 @@ namespace backend.Controllers
             _service = service;
         }
 
-        // ADMIN: lấy tất cả (kể cả ẩn)
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -24,7 +23,6 @@ namespace backend.Controllers
             return Ok(ApiResponse<List<NewsDto>>.Success(data));
         }
 
-        // USER: chỉ lấy bài viết đang active
         [HttpGet("active")]
         public async Task<IActionResult> GetActive()
         {

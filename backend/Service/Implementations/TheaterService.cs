@@ -1,4 +1,5 @@
 ﻿using backend.Data;
+using backend.DTO;
 using backend.Model;
 using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -10,46 +11,57 @@ namespace backend.Services.Implementations
         private readonly AppDbContext _db;
         public TheaterService(AppDbContext db) => _db = db;
 
-        public async Task<IEnumerable<Theater>> GetAllAsync()
+        public async Task<IEnumerable<TheaterDto>> GetAllAsync()
         {
-            return await _db.Theaters.AsNoTracking().ToListAsync();
+            var entities = await _db.Theaters.AsNoTracking().ToListAsync();
+            return entities.Select(MapToDto);
         }
 
-        public async Task<Theater?> GetByIdAsync(long id)
+        public async Task<TheaterDto?> GetByIdAsync(long id)
         {
-            return await _db.Theaters.AsNoTracking().FirstOrDefaultAsync(t => t.id == id);
+            var entity = await _db.Theaters.AsNoTracking()
+                .FirstOrDefaultAsync(t => t.id == id);
+
+            return entity == null ? null : MapToDto(entity);
         }
-        public async Task<IEnumerable<Theater>> GetByLocationAsync(string location)
+
+        public async Task<IEnumerable<TheaterDto>> GetByLocationAsync(string location)
         {
             if (string.IsNullOrWhiteSpace(location))
-                return Enumerable.Empty<Theater>();
+                return Enumerable.Empty<TheaterDto>();
 
             var q = location.Trim().ToLowerInvariant();
 
-            return await _db.Theaters
-                            .AsNoTracking()
-                            .Where(t => !string.IsNullOrEmpty(t.location) && t.location.ToLower().Contains(q))
-                            .ToListAsync();
+            var list = await _db.Theaters
+                .AsNoTracking()
+                .Where(t => !string.IsNullOrEmpty(t.location) &&
+                            t.location.ToLower().Contains(q))
+                .ToListAsync();
+
+            return list.Select(MapToDto);
         }
 
-        public async Task<long> CreateAsync(Theater theater)
+        public async Task<TheaterDto> CreateAsync(TheaterDto dto)
         {
-            _db.Theaters.Add(theater);
+            var entity = MapToEntity(dto);
+
+            _db.Theaters.Add(entity);
             await _db.SaveChangesAsync();
-            return theater.id;
+
+            return MapToDto(entity);
         }
 
-        public async Task<Theater?> UpdateAsync(long id, Theater theater)
+        public async Task<TheaterDto?> UpdateAsync(long id, TheaterDto dto)
         {
             var existing = await _db.Theaters.FindAsync(id);
             if (existing == null) return null;
 
-            existing.name = theater.name;
-            existing.location = theater.location;
-            existing.capacity = theater.capacity;
+            existing.name = dto.Name;
+            existing.location = dto.Location;
+            existing.capacity = dto.Capacity;
 
             await _db.SaveChangesAsync();
-            return existing;
+            return MapToDto(existing);
         }
 
         public async Task<bool> DeleteAsync(long id)
@@ -60,6 +72,27 @@ namespace backend.Services.Implementations
             _db.Theaters.Remove(existing);
             await _db.SaveChangesAsync();
             return true;
+        }
+
+        private static TheaterDto MapToDto(Theater t)
+        {
+            return new TheaterDto
+            {
+                Id = t.id,
+                Name = t.name,
+                Location = t.location,
+                Capacity = t.capacity
+            };
+        }
+
+        private static Theater MapToEntity(TheaterDto dto)
+        {
+            return new Theater
+            {
+                name = dto.Name,
+                location = dto.Location,
+                capacity = dto.Capacity
+            };
         }
     }
 }

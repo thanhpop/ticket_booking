@@ -1,10 +1,6 @@
-﻿using AutoMapper;
-using backend.DTO;
+﻿using backend.DTO;
 using backend.Helpers;
-using backend.Middleware;
-using backend.Model;
 using backend.Service.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
@@ -14,53 +10,42 @@ namespace backend.Controllers
     public class MovieController : ControllerBase
     {
         private readonly IMovieService _service;
-        private readonly IMapper _mapper;
-        public MovieController(IMovieService service, IMapper mapper)
+
+        public MovieController(IMovieService service)
         {
             _service = service;
-            _mapper = mapper;
         }
 
         [HttpGet]
-
         public async Task<IActionResult> GetAll()
         {
-            var entities = await _service.GetAllAsync();
-            var dtos = _mapper.Map<IEnumerable<MovieDto>>(entities);
-            var resp = ApiResponse<IEnumerable<MovieDto>>.Success(dtos);
-
-            return Ok(resp);
+            var data = await _service.GetAllAsync();
+            return Ok(ApiResponse<IEnumerable<MovieDto>>.Success(data));
         }
 
         [HttpGet("{id:long}")]
         public async Task<IActionResult> Get(long id)
         {
-            var entity = await _service.GetByIdAsync(id);
-            if (entity == null) return NotFound();
-            var dto = _mapper.Map<MovieDto>(entity);
-            return Ok(ApiResponse<MovieDto>.Success(dto));
+            var movie = await _service.GetByIdAsync(id);
+            if (movie == null) return NotFound();
+
+            return Ok(ApiResponse<MovieDto>.Success(movie));
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] MovieDto dto)
         {
-            var entity = _mapper.Map<Movie>(dto);
-            var id = await _service.CreateAsync(entity);
-            var resultDto = _mapper.Map<MovieDto>(entity);
-            var resp = ApiResponse<MovieDto>.Success(resultDto);
-            return CreatedAtAction(nameof(Get), new { id }, resp);
+            var created = await _service.CreateAsync(dto);
+            return Ok(ApiResponse<MovieDto>.Success(created));
         }
 
         [HttpPut("{id:long}")]
-
         public async Task<IActionResult> Update(long id, [FromBody] MovieDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var entity = _mapper.Map<Movie>(dto);
-            var updatedEntity = await _service.UpdateAsync(id, entity);
-            var resultDto = _mapper.Map<MovieDto>(updatedEntity);
-    
-            return Ok(ApiResponse<MovieDto>.Success(resultDto));
+            var updated = await _service.UpdateAsync(id, dto);
+            if (updated == null) return NotFound();
+
+            return Ok(ApiResponse<MovieDto>.Success(updated));
         }
 
         [HttpDelete("{id:long}")]
@@ -68,6 +53,7 @@ namespace backend.Controllers
         {
             var ok = await _service.DeleteAsync(id);
             if (!ok) return NotFound();
+
             return NoContent();
         }
     }

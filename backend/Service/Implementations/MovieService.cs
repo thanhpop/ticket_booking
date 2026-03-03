@@ -1,7 +1,7 @@
 ﻿using backend.Data;
+using backend.DTO;
 using backend.Model;
 using backend.Service.Interfaces;
-using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services.Implementations
@@ -11,50 +11,92 @@ namespace backend.Services.Implementations
         private readonly AppDbContext _db;
         public MovieService(AppDbContext db) => _db = db;
 
-        public async Task<IEnumerable<Movie>> GetAllAsync()
+        public async Task<IEnumerable<MovieDto>> GetAllAsync()
         {
-            return await _db.Movies.AsNoTracking().ToListAsync();
+            var entities = await _db.Movies.AsNoTracking().ToListAsync();
+            return entities.Select(MapToDto);
         }
 
-        public async Task<Movie?> GetByIdAsync(long id)
+        public async Task<MovieDto?> GetByIdAsync(long id)
         {
-            return await _db.Movies.AsNoTracking().FirstOrDefaultAsync(m => m.id == id);
+            var entity = await _db.Movies.AsNoTracking()
+                .FirstOrDefaultAsync(m => m.id == id);
+
+            return entity == null ? null : MapToDto(entity);
         }
 
-        public async Task<long> CreateAsync(Movie movie)
+        public async Task<MovieDto> CreateAsync(MovieDto dto)
         {
-            _db.Movies.Add(movie);
+            var entity = MapToEntity(dto);
+
+            _db.Movies.Add(entity);
             await _db.SaveChangesAsync();
-            return movie.id;
+
+            return MapToDto(entity);
         }
 
-        public async Task<Movie?> UpdateAsync(long id, Movie movie)
+        public async Task<MovieDto?> UpdateAsync(long id, MovieDto dto)
         {
             var existing = await _db.Movies.FindAsync(id);
             if (existing == null) return null;
 
-            existing.title = movie.title;
-            existing.poster = movie.poster;
-            existing.overview = movie.overview;
-            existing.genres = movie.genres ?? new List<string>();
-            existing.duration = movie.duration;
-            existing.language = movie.language;
-            existing.releaseDate = movie.releaseDate;
-            existing.imdbId = movie.imdbId;
-            existing.filmId = movie.filmId;
-            existing.trailer = movie.trailer;   
+            existing.title = dto.Title;
+            existing.poster = dto.Poster;
+            existing.overview = dto.Overview;
+            existing.genres = dto.Genres ?? new List<string>();
+            existing.duration = dto.Duration;
+            existing.language = dto.Language;
+            existing.releaseDate = dto.ReleaseDate;
+            existing.imdbId = dto.ImdbId;
+            existing.filmId = dto.FilmId;
+            existing.trailer = dto.Trailer;
 
             await _db.SaveChangesAsync();
-            return existing;
+            return MapToDto(existing);
         }
 
         public async Task<bool> DeleteAsync(long id)
         {
             var existing = await _db.Movies.FindAsync(id);
             if (existing == null) return false;
+
             _db.Movies.Remove(existing);
             await _db.SaveChangesAsync();
             return true;
+        }
+        private static MovieDto MapToDto(Movie m)
+        {
+            return new MovieDto
+            {
+                Id = m.id,
+                Title = m.title,
+                Poster = m.poster,
+                Overview = m.overview,
+                Genres = m.genres,
+                Duration = m.duration,
+                Language = m.language,
+                ReleaseDate = m.releaseDate,
+                ImdbId = m.imdbId,
+                FilmId = m.filmId,
+                Trailer = m.trailer
+            };
+        }
+
+        private static Movie MapToEntity(MovieDto dto)
+        {
+            return new Movie
+            {
+                title = dto.Title,
+                poster = dto.Poster,
+                overview = dto.Overview,
+                genres = dto.Genres ?? new List<string>(),
+                duration = dto.Duration,
+                language = dto.Language,
+                releaseDate = dto.ReleaseDate,
+                imdbId = dto.ImdbId,
+                filmId = dto.FilmId,
+                trailer = dto.Trailer
+            };
         }
     }
 }

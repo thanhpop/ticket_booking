@@ -19,6 +19,7 @@ import {
   CalendarOutlined,
   CreditCardOutlined,
   UserOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import AppHeader from "../../components/AppHeader";
 import AppFooter from "../../components/AppFooter";
@@ -28,7 +29,10 @@ import theaterService from "../../services/theaterService";
 
 import { reservationService } from "../../services/reservationService";
 import { paymentService } from "../../services/paymentService";
+import { seatSessionService } from "../../services/seatSessionService";
+import { seatService } from "../../services/seatService";
 import type { Seat } from "../../types/Seat";
+import { createSeatStream } from "../../services/seatStreamService";
 
 const { Content } = Layout;
 const { Text, Title } = Typography;
@@ -36,7 +40,7 @@ const { Text, Title } = Typography;
 const paymentMethods = [
   {
     id: "vnpay",
-    name: "VNPay QR",
+    name: "VNPay",
     icon: "https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR-1.png",
     color: "#005baa",
   },
@@ -52,6 +56,7 @@ const BookingPage: React.FC = () => {
 
   const [seats, setSeats] = useState<Seat[]>([]);
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
+  const [holdSeatIds, setHoldSeatIds] = useState<number[]>([]);
 
   const [selectedPayment, setSelectedPayment] = useState<string>("");
   const [contactInfo, setContactInfo] = useState<{
@@ -61,6 +66,120 @@ const BookingPage: React.FC = () => {
     name: "",
     email: "",
   });
+
+  const [expireAt, setExpireAt] = useState<string | null>(null);
+  const [serverOffset, setServerOffset] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+  useEffect(() => {
+    if (!showtimeId) return;
+
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return;
+
+    const user = JSON.parse(userStr);
+
+    const startSession = async () => {
+      const data = await seatSessionService.startSession(
+        Number(showtimeId),
+        user.userId,
+      );
+
+      if (data.expireAt) {
+        setExpireAt(data.expireAt);
+
+        const offset = new Date(data.serverTime).getTime() - Date.now();
+
+        setServerOffset(offset);
+      }
+    };
+
+    startSession();
+  }, [showtimeId]);
+  useEffect(() => {
+    if (!showtimeId) return;
+
+    let eventSource: EventSource | null = null;
+
+    const connect = () => {
+      eventSource = createSeatStream(Number(showtimeId));
+
+      eventSource.onopen = () => {
+        console.log("Seat stream connected");
+      };
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        setHoldSeatIds(data.holdSeatIds || []);
+
+        setSeats((prev) =>
+          prev.map((seat) => ({
+            ...seat,
+            isReserved: data.soldSeatIds?.includes(seat.id)
+              ? true
+              : seat.isReserved,
+          })),
+        );
+      };
+
+      eventSource.onerror = () => {
+        console.warn("Seat stream disconnected. Reconnecting...");
+        eventSource?.close();
+        setTimeout(connect, 3000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      eventSource?.close();
+    };
+  }, [showtimeId]);
+  useEffect(() => {
+    if (!showtimeId) return;
+
+    const loadSeatStatus = async () => {
+      try {
+        const data = await seatService.getSeatStatus(Number(showtimeId));
+        setHoldSeatIds(data);
+      } catch (err) {
+        console.error("Không load được seat status");
+      }
+    };
+
+    loadSeatStatus();
+  }, [showtimeId]);
+
+  useEffect(() => {
+    if (!expireAt) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now() + serverOffset;
+      const diff = Math.floor((new Date(expireAt).getTime() - now) / 1000);
+
+      if (diff <= 0) {
+        setTimeLeft(0);
+        clearInterval(interval);
+
+        message.warning("Hết thời gian giữ ghế!");
+        setTimeout(() => {
+          navigate("/");
+        }, 900);
+        setSelectedSeats([]);
+        return;
+      }
+
+      setTimeLeft(diff);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [expireAt, serverOffset, navigate]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -111,6 +230,41 @@ const BookingPage: React.FC = () => {
 
     fetchData();
   }, [showtimeId]);
+  useEffect(() => {
+    if (!showtimeId) return;
+    if (seats.length === 0) return;
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return;
+
+    const user = JSON.parse(userStr);
+
+    const loadSnapshot = async () => {
+      try {
+        const data = await seatSessionService.getSnapshot(
+          Number(showtimeId),
+          user.userId,
+        );
+
+        setHoldSeatIds(data.holdSeats || []);
+
+        const mySeatIds: number[] = data.mySeats || [];
+
+        setSelectedSeats(seats.filter((s) => mySeatIds.includes(s.id)));
+
+        if (data.expireAt) {
+          setExpireAt(data.expireAt);
+
+          const offset = new Date(data.serverTime).getTime() - Date.now();
+
+          setServerOffset(offset);
+        }
+      } catch (err) {
+        console.error("Snapshot load failed");
+      }
+    };
+
+    loadSnapshot();
+  }, [showtimeId, seats]);
 
   const sortSeats = (seats: Seat[]) => {
     return [...seats].sort((a, b) => {
@@ -127,19 +281,40 @@ const BookingPage: React.FC = () => {
     });
   };
 
-  const handleSeatClick = (seat: Seat) => {
-    if (seat.isReserved) return;
-
+  const handleSeatClick = async (seat: Seat) => {
     const isSelected = selectedSeats.some((s) => s.id === seat.id);
+    const isHeldByOthers = holdSeatIds.includes(seat.id) && !isSelected;
+    if (seat.isReserved || isHeldByOthers) return;
 
-    if (isSelected) {
-      setSelectedSeats((prev) => prev.filter((s) => s.id !== seat.id));
-    } else {
-      if (selectedSeats.length >= 8) {
-        message.warning("Bạn chỉ được chọn tối đa 8 ghế!");
-        return;
+    const userStr = localStorage.getItem("user");
+    if (!userStr) {
+      message.error("Vui lòng đăng nhập");
+      return;
+    }
+
+    const user = JSON.parse(userStr);
+
+    try {
+      if (isSelected) {
+        await seatSessionService.removeSeats(Number(showtimeId), user.userId, [
+          seat.id,
+        ]);
+
+        setSelectedSeats((prev) => prev.filter((s) => s.id !== seat.id));
+      } else {
+        if (selectedSeats.length >= 8) {
+          message.warning("Bạn chỉ được chọn tối đa 8 ghế!");
+          return;
+        }
+
+        await seatSessionService.addSeats(Number(showtimeId), user.userId, [
+          seat.id,
+        ]);
+
+        setSelectedSeats((prev) => [...prev, seat]);
       }
-      setSelectedSeats((prev) => [...prev, seat]);
+    } catch (err) {
+      message.error("Không thể giữ ghế");
     }
   };
 
@@ -241,23 +416,27 @@ const BookingPage: React.FC = () => {
                     <div className="grid grid-cols-10 gap-2 md:gap-3">
                       {seats.map((seat) => {
                         const isSelected = selectedSeats.some(
-                          (s) => s.id === seat.id
+                          (s) => s.id === seat.id,
                         );
+                        const isHeldByOthers =
+                          holdSeatIds.includes(seat.id) && !isSelected;
 
                         return (
                           <div
                             key={seat.id}
                             onClick={() => handleSeatClick(seat)}
                             className={`
-                                w-9 h-9 md:w-11 md:h-11 rounded-t-lg text-[10px] md:text-xs font-bold flex items-center justify-center cursor-pointer transition-all duration-200 select-none shadow-sm border
-                                ${
-                                  seat.isReserved
-                                    ? "bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed"
-                                    : isSelected
-                                    ? "!bg-blue-600 !border-blue-600 text-white transform scale-110 shadow-lg z-10"
-                                    : "bg-white border-gray-300 text-gray-600 hover:bg-blue-50 hover:border-blue-400"
-                                }
-                                `}
+        w-9 h-9 md:w-11 md:h-11 rounded-t-lg text-[10px] md:text-xs font-bold flex items-center justify-center cursor-pointer transition-all duration-200 select-none shadow-sm border
+        ${
+          seat.isReserved
+            ? "bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed"
+            : isSelected
+              ? "!bg-[rgb(3,89,157)] !border-[rgb(3,89,157)] text-white transform scale-110 shadow-lg z-10"
+              : isHeldByOthers
+                ? "bg-[rgb(63,183,249)] border-blue-400 text-white cursor-not-allowed pointer-events-none"
+                : "bg-white border-gray-300 text-gray-600 hover:bg-blue-50 hover:border-blue-400"
+        }
+      `}
                           >
                             {seat.seatNumber}
                           </div>
@@ -266,18 +445,35 @@ const BookingPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-center gap-4 md:gap-8 mt-12 border-t pt-8">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded border border-gray-300 bg-white"></div>
-                      <span className="text-sm text-gray-500">Ghế thường</span>
+                  <div className="flex flex-col md:flex-row justify-between items-center mt-12 border-t border-gray-300 pt-8 gap-4">
+                    <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded border border-gray-300 bg-white"></div>
+                        <span className="text-sm text-gray-500">
+                          Ghế thường
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-[rgb(3,89,157)] border border-blue-600"></div>
+                        <span className="text-sm text-gray-500">Đang chọn</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-[rgb(63,183,249)] border border-blue-400"></div>
+                        <span className="text-sm text-gray-500">Đang giữ</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-gray-300 border border-gray-300 text-center text-xs text-gray-500 font-bold leading-6 flex items-center justify-center"></div>
+                        <span className="text-sm text-gray-500">Đã đặt</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded bg-blue-600 border border-blue-600"></div>
-                      <span className="text-sm text-gray-500">Đang chọn</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded bg-gray-300 border border-gray-300 text-center text-xs text-gray-500 font-bold leading-6 flex items-center justify-center"></div>
-                      <span className="text-sm text-gray-500">Đã đặt</span>
+                    <div className="flex items-center gap-2 text-black-600 bg-white-50 px-4 py-2 rounded-lg border border-gray-100 shadow-sm">
+                      <ClockCircleOutlined className="text-lg" />
+                      <span className="text-sm font-medium">
+                        Thời gian còn lại:
+                      </span>
+                      <span className="text-xl font-bold font-mono">
+                        {formatTime(timeLeft)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -360,6 +556,17 @@ const BookingPage: React.FC = () => {
                       ))}
                     </div>
                   </div>
+                  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-black-500">
+                      <ClockCircleOutlined className="text-xl" />
+                      <span className="font-bold text-lg">
+                        Thời gian còn lại:
+                      </span>
+                    </div>
+                    <span className="text-2xl font-black text-black-600 font-mono">
+                      {formatTime(timeLeft)}
+                    </span>
+                  </div>
                 </div>
               )}
             </Col>
@@ -403,7 +610,7 @@ const BookingPage: React.FC = () => {
                         <span className="text-gray-500 text-xs">
                           {showtime?.showDate &&
                             new Date(showtime.showDate).toLocaleDateString(
-                              "vi-VN"
+                              "vi-VN",
                             )}
                         </span>
                       </div>
@@ -424,7 +631,7 @@ const BookingPage: React.FC = () => {
                             </span>
                           ))
                         ) : (
-                          <span className="text-gray-400 italic text-xs pt-1">
+                          <span className="text-gray-400 text-xs pt-1">
                             Chưa chọn ghế
                           </span>
                         )}
@@ -432,13 +639,13 @@ const BookingPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-gray-50 border-t border-gray-100">
+                  <div className="p-6 border-t border-gray-100">
                     <div className="flex justify-between items-center mb-6">
                       <span className="text-gray-600 font-medium">
                         Tổng cộng
                       </span>
-                      <span className="text-3xl font-black text-blue-600 tracking-tight">
-                        {totalPrice.toLocaleString("vi-VN")} đ
+                      <span className="text-2xl font-black text-blue-500 tracking-tight">
+                        {totalPrice.toLocaleString("vi-VN")} vnđ
                       </span>
                     </div>
                     <Button

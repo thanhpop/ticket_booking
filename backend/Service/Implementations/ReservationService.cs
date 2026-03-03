@@ -10,11 +10,13 @@ namespace backend.Service.Implementations
     {
         private readonly AppDbContext _db;
         private readonly ILogger<ReservationService> _log;
+        private readonly SeatSessionService _seatSessionService;
 
-        public ReservationService(AppDbContext db, ILogger<ReservationService> log)
+        public ReservationService(AppDbContext db, ILogger<ReservationService> log, SeatSessionService seatSessionService)
         {
             _db = db;
             _log = log;
+            _seatSessionService = seatSessionService;
         }
         private static string GenerateHexId()
         {
@@ -143,9 +145,7 @@ namespace backend.Service.Implementations
 
             foreach (var seat in seats)
             {
-                seat.IsReserved = true;
                 seat.ReservationId = reservation.Id;
-                _db.Seats.Update(seat);
             }
 
             showtime.AvailableSeats -= seats.Count;
@@ -181,7 +181,8 @@ namespace backend.Service.Implementations
         public async Task<bool> ConfirmReservationAsync(string reservationId)
         {
             var reservation = await _db.Reservations
-                .FirstOrDefaultAsync(r => r.Id == reservationId);
+    .Include(r => r.Seats)
+    .FirstOrDefaultAsync(r => r.Id == reservationId);
 
             if (reservation == null)
                 return false;
@@ -189,15 +190,26 @@ namespace backend.Service.Implementations
             if (reservation.StatusId == 3)
                 throw new InvalidOperationException("Cannot confirm a canceled reservation");
 
-            // Đã confirm rồi thì thôi
             if (reservation.StatusId == 2 && reservation.Paid)
                 return true;
+            foreach (var seat in reservation.Seats)
+            {
+                if (seat.IsReserved)
+                    throw new InvalidOperationException($"Seat {seat.SeatNumber} already reserved");
+
+                seat.IsReserved = true;
+            }
+            
 
             reservation.StatusId = 2; 
             reservation.Paid = true;
 
             _db.Reservations.Update(reservation);
             await _db.SaveChangesAsync();
+
+            await _seatSessionService.RemoveAsync((int)reservation.ShowtimeId,  reservation.UserId);
+
+
 
             return true;
         }
@@ -220,8 +232,14 @@ namespace backend.Service.Implementations
                 var seats = reservation.Seats;
                 foreach (var seat in seats)
                 {
-                    seat.IsReserved = false;
+                    if (seat.IsReserved)
+                    {
+                        seat.IsReserved = false;
+                        reservation.Showtime.AvailableSeats += 1;
+                    }
+
                     seat.ReservationId = null;
+
                 }
                 _db.Seats.UpdateRange(seats);
 
@@ -232,6 +250,12 @@ namespace backend.Service.Implementations
                 _db.Reservations.Update(reservation);
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
+
+                await _seatSessionService.RemoveAsync(
+           (int)reservation.ShowtimeId,
+           reservation.UserId
+       );
+
 
                 return true;
             }

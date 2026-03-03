@@ -1,8 +1,10 @@
-﻿using backend.DTO;
+﻿using backend.Data;
+using backend.DTO;
 using backend.Helpers;
 using backend.Model.Vnpay;
 using backend.Service.Vnpay;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 
@@ -14,20 +16,35 @@ namespace backend.Controller
     {
 
         private readonly IVnPayService _vnPayService;
-        public PaymentController(IVnPayService vnPayService)
+        private readonly SeatSessionService _seatSessionService;
+        private readonly AppDbContext _context;
+        public PaymentController(IVnPayService vnPayService, SeatSessionService seatSessionService, AppDbContext context)
         {
 
             _vnPayService = vnPayService;
+            _seatSessionService = seatSessionService;
+            _context = context;
         }
         [HttpPost("vnpay")]
-        public IActionResult CreatePaymentUrlVnpay(PaymentInformationModel model)
+        public async Task<IActionResult> CreatePaymentUrlVnpay(PaymentInformationModel model)
         {
+            var reservation = await _context.Reservations
+                .FirstOrDefaultAsync(r => r.Id == model.ReservationId);
+
+            if (reservation == null)
+                return BadRequest("Reservation not found");
+
+            var extended = await _seatSessionService
+                .ExtendTtlAsync(reservation.ShowtimeId, reservation.UserId, 15);
+
+            if (!extended)
+                return BadRequest("Seat session expired.");
+
             var url = _vnPayService.CreatePaymentUrl(model, HttpContext);
 
-            var dto = new PaymentDto { PaymentUrl = url };
-
-            return Ok(ApiResponse<PaymentDto>.Success(dto));
-
+            return Ok(ApiResponse<PaymentDto>.Success(
+                new PaymentDto { PaymentUrl = url }
+            ));
         }
         [HttpGet]
         public IActionResult PaymentCallbackVnpay()

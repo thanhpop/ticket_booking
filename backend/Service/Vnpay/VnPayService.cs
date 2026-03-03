@@ -28,15 +28,13 @@ namespace backend.Service.Vnpay
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
 
-            // ✅ OrderInfo mặc định
             pay.AddRequestData($"vnp_OrderInfo", $"Thanh toan don - ReservationId: {model.ReservationId}");
 
-            // ✅ OrderType mặc định
             pay.AddRequestData("vnp_OrderType", "other");
 
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
 
-            // ✅ TxnRef = ReservationId
+
             pay.AddRequestData("vnp_TxnRef", model.ReservationId);
 
             var paymentUrl = pay.CreateRequestUrl(

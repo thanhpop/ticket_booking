@@ -10,6 +10,7 @@ using backend.Service.Vnpay;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,12 @@ var conn = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(conn, ServerVersion.AutoDetect(conn)));
 
-builder.Services.AddAutoMapper(cfg => { },typeof(AutoMappingProfile).Assembly);
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var redisConn = builder.Configuration["Redis:Connection"];
+    return ConnectionMultiplexer.Connect(redisConn);
+});
+
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -47,6 +53,7 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
 
 
 
@@ -81,6 +88,22 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+var redis = app.Services.GetRequiredService<IConnectionMultiplexer>();
+var subscriber = redis.GetSubscriber();
+
+subscriber.Subscribe("seat-updated", async (channel, message) =>
+{
+    int showtimeId = int.Parse(message);
+
+    using var scope = app.Services.CreateScope();
+    var seatService = scope.ServiceProvider.GetRequiredService<SeatSessionService>();
+    var eventService = scope.ServiceProvider.GetRequiredService<SeatEventService>();
+
+    var holdSeats = await seatService.GetAllHoldSeatsByShowtime(showtimeId);
+
+    await eventService.BroadcastAsync(showtimeId, holdSeats);
+});
 
 app.UseExceptionHandler();
 

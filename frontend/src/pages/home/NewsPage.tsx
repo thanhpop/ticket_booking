@@ -101,7 +101,7 @@ const NewsPage: React.FC = () => {
       <AppHeader />
 
       <Content>
-        <div className="bg-gray-50 py-8 border-b">
+        <div className="bg-gray-50 py-8 border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4">
             <Title level={2} className="border-l-4 border-blue-600 pl-4">
               TIN TỨC & ƯU ĐÃI

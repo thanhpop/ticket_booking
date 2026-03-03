@@ -22,6 +22,8 @@ namespace backend.Extensions
             services.AddScoped<IReservationService, ReservationService>();
             services.AddScoped<IBannerService, BannerService>();
             services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<SeatSessionService>();
+            services.AddSingleton<SeatEventService>();
             return services;
         }
     }

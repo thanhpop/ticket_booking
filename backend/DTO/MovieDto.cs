@@ -5,33 +5,33 @@ namespace backend.DTO
 {
     public class MovieDto : AbstractMappedEntity
     {
-        public long id { get; set; }
+        public long Id { get; set; }
 
         [Required(ErrorMessage = "Title is required.")]
-        public string? title { get; set; }
+        public string? Title { get; set; }
+
         [Url(ErrorMessage = "Poster must be a valid URL.")]
-        public string? poster { get; set; }
+        public string? Poster { get; set; }
 
-        public string? overview { get; set; }
+        public string? Overview { get; set; }
 
-        public List<string> genres { get; set; } = new();
+        public List<string> Genres { get; set; } = new();
 
         [Range(0, 1000, ErrorMessage = "Duration must be a number between 0 and 1000.")]
-        public int duration { get; set; }
+        public int Duration { get; set; }
 
-        public string? language { get; set; }
-
+        public string? Language { get; set; }
 
         [Required(ErrorMessage = "Release date is required.")]
-        [DataType(DataType.Date, ErrorMessage = "Release date must be a valid date.")]
-        public DateTime releaseDate { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime ReleaseDate { get; set; }
 
         [Required(ErrorMessage = "IMDB id is required.")]
-        public string imdbId { get; set; } = null!;
+        public string ImdbId { get; set; } = null!;
 
         [Required(ErrorMessage = "Film id is required.")]
-        public string filmId { get; set; } = null!;
+        public string FilmId { get; set; } = null!;
 
-        public string? trailer { get; set; }    
+        public string? Trailer { get; set; }
     }
 }

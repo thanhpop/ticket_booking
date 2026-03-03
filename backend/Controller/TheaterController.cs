@@ -1,9 +1,6 @@
-﻿using AutoMapper;
-using backend.DTO;
+﻿using backend.DTO;
 using backend.Helpers;
-using backend.Model;
 using backend.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
@@ -13,68 +10,57 @@ namespace backend.Controllers
     public class TheaterController : ControllerBase
     {
         private readonly ITheaterService _service;
-        private readonly IMapper _mapper;
         private readonly ILogger<TheaterController> _logger;
 
-        public TheaterController(ITheaterService service, IMapper mapper, ILogger<TheaterController> logger)
+        public TheaterController(ITheaterService service, ILogger<TheaterController> logger)
         {
             _service = service;
-            _mapper = mapper;
             _logger = logger;
         }
 
         [HttpGet]
-
         public async Task<IActionResult> GetAll()
         {
-            var list = await _service.GetAllAsync();
-            var dtos = _mapper.Map<IEnumerable<TheaterDto>>(list);
-            var resp = ApiResponse<IEnumerable<TheaterDto>>.Success(dtos);
-            return Ok(resp);
+            var data = await _service.GetAllAsync();
+            return Ok(ApiResponse<IEnumerable<TheaterDto>>.Success(data));
         }
 
         [HttpGet("{id}")]
-
         public async Task<IActionResult> Get(long id)
         {
             var item = await _service.GetByIdAsync(id);
-            var dto = _mapper.Map<TheaterDto>(item);
+            if (item == null)
+                return NotFound(ApiResponse<TheaterDto>.Fail("Not found", 404));
 
-            return Ok(ApiResponse<TheaterDto>.Success(dto));
+            return Ok(ApiResponse<TheaterDto>.Success(item));
         }
+
         [HttpGet("search")]
-  
         public async Task<IActionResult> GetByLocation([FromQuery] string location)
         {
-            if (string.IsNullOrWhiteSpace(location))
-                return BadRequest("Query parameter 'location' is required.");
-
-            var list = await _service.GetByLocationAsync(location);
-            var dtos = list.Select(t => new TheaterDto { id = t.id, name = t.name, location = t.location, capacity = t.capacity });
-            return Ok(ApiResponse<IEnumerable<TheaterDto>>.Success(dtos));
+            var data = await _service.GetByLocationAsync(location);
+            return Ok(ApiResponse<IEnumerable<TheaterDto>>.Success(data));
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TheaterDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var theater = _mapper.Map<Theater>(dto);
-            var newId = await _service.CreateAsync(theater);
-            var resultDto = _mapper.Map<TheaterDto>(theater);
-            var resp = ApiResponse<TheaterDto>.Success(resultDto, "Created", 201);
-            return CreatedAtAction(nameof(Get), new { id = newId }, resp);
+
+            var created = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(Get),
+                new { id = created.Id },
+                ApiResponse<TheaterDto>.Success(created, "Created", 201));
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] TheaterDto dto)
         {
-            var updated = await _service.UpdateAsync(id, _mapper.Map<Theater>(dto));
-
+            var updated = await _service.UpdateAsync(id, dto);
             if (updated == null)
                 return NotFound(ApiResponse<TheaterDto>.Fail("Not found", 404));
 
-            var resultDto = _mapper.Map<TheaterDto>(updated);
-            return Ok(ApiResponse<TheaterDto>.Success(resultDto, "Updated successfully"));
+            return Ok(ApiResponse<TheaterDto>.Success(updated, "Updated successfully"));
         }
 
         [HttpDelete("{id}")]
@@ -82,6 +68,7 @@ namespace backend.Controllers
         {
             var ok = await _service.DeleteAsync(id);
             if (!ok) return NotFound();
+
             return NoContent();
         }
     }

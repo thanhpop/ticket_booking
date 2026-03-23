@@ -10,6 +10,7 @@ import {
   UserOutlined,
   PictureOutlined,
   ReadOutlined,
+  AreaChartOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import logo from "../../assets/logo-cinema2.png";
@@ -20,6 +21,11 @@ const AdminLayout: React.FC = () => {
   const { pathname } = useLocation();
   const items: MenuProps["items"] = useMemo(
     () => [
+      {
+        key: "/admin/dashboard",
+        icon: <AreaChartOutlined />,
+        label: <Link to="/admin/dashboard">Thống kê</Link>,
+      },
       {
         key: "/admin/movie",
         icon: <VideoCameraOutlined />,

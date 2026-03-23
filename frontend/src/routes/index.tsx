@@ -19,6 +19,7 @@ import NewsPage from "../pages/home/NewsPage.tsx";
 import BannerPage from "../pages/admin/Banner.tsx";
 import NewsManagementPage from "../pages/admin/News.tsx";
 import NewsDetailPage from "../pages/home/NewsDetailPage.tsx";
+import AdminDashboard from "../pages/admin/Dashboard.tsx";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -32,6 +33,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/news/:id" element={<NewsDetailPage />} />
       <Route path="/paymentResult" element={<PaymentResult />} />
       <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
         <Route path="movie" element={<MoviePage />} />
         <Route path="theater" element={<TheaterPage />} />
         <Route path="showtime" element={<Showtime />} />
@@ -39,6 +41,7 @@ const AppRoutes: React.FC = () => {
         <Route path="users" element={<UserManagementPage />} />
         <Route path="banner" element={<BannerPage />} />
         <Route path="news" element={<NewsManagementPage />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

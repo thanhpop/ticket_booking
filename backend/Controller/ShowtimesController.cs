@@ -1,5 +1,4 @@
-﻿// backend/Controllers/ShowtimesController.cs
-using backend.DTO;
+﻿using backend.DTO;
 using backend.Helpers;
 using backend.Service.Interfaces;
 using backend.Services.Implementations;

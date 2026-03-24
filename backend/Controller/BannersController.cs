@@ -3,10 +3,12 @@ using backend.Helpers;
 using backend.Model;
 using backend.Service.Implementations;
 using backend.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controller
 {
+    [Authorize]
     [ApiController]
     [Route("api/banners")]
     public class BannersController : ControllerBase
@@ -17,13 +19,14 @@ namespace backend.Controller
         {
             _service = service;
         }
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var data = await _service.GetAllAsync();
             return Ok(ApiResponse<List<BannerDto>>.Success(data));
         }
-
+        [AllowAnonymous]
         [HttpGet("active")]
         public async Task<IActionResult> GetActive()
         {

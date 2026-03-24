@@ -3,6 +3,7 @@ using backend.DTO;
 using backend.Helpers;
 using backend.Model.Vnpay;
 using backend.Service.Vnpay;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controller
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PaymentController : ControllerBase

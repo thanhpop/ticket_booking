@@ -1,10 +1,12 @@
 ﻿using backend.DTO;
 using backend.Helpers;
 using backend.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MovieController : ControllerBase
@@ -15,14 +17,14 @@ namespace backend.Controllers
         {
             _service = service;
         }
-
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var data = await _service.GetAllAsync();
             return Ok(ApiResponse<IEnumerable<MovieDto>>.Success(data));
         }
-
+        [AllowAnonymous]
         [HttpGet("{id:long}")]
         public async Task<IActionResult> Get(long id)
         {

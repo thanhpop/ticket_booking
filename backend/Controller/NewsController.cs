@@ -1,10 +1,12 @@
 ﻿using backend.DTO;
 using backend.Helpers;
 using backend.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    
     [ApiController]
     [Route("api/news")]
     public class NewsController : ControllerBase
@@ -41,14 +43,14 @@ namespace backend.Controllers
 
             return Ok(ApiResponse<NewsDto>.Success(news));
         }
-
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] NewsDto dto)
         {
             var created = await _service.CreateAsync(dto);
             return Ok(ApiResponse<NewsDto>.Success(created, "Tạo bài viết thành công"));
         }
-
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] NewsDto dto)
         {
@@ -60,7 +62,7 @@ namespace backend.Controllers
 
             return Ok(ApiResponse<NewsDto>.Success(updated, "Cập nhật thành công"));
         }
-
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

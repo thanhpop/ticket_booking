@@ -37,7 +37,6 @@ export default function QuillEditor({ value, onChange }: Props) {
     quillRef.current = quill;
   }, []);
 
-  // 👉 CHỈ set content khi value đổi từ bên ngoài (edit bài)
   useEffect(() => {
     if (!quillRef.current || value === undefined) return;
 

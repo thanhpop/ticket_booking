@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ShowtimesController : ControllerBase
@@ -20,14 +21,14 @@ namespace backend.Controllers
             _service = service;
             _logger = logger;
         }
-
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var list = await _service.GetAllAsync();
             return Ok(new ApiResponse<object>(200, "Success", list));
         }
-
+        [AllowAnonymous]
         [HttpGet("{id:long}")]
         //[Authorize]
         public async Task<IActionResult> GetById(long id)
@@ -35,7 +36,7 @@ namespace backend.Controllers
             var item = await _service.GetByIdAsync(id);
             return Ok(ApiResponse<ShowtimeDto>.Success(item));
         }
-
+        [AllowAnonymous]
         [HttpGet("movie/{movieId:long}")]
         //[Authorize]
         public async Task<IActionResult> GetByMovie(long movieId)
@@ -43,7 +44,7 @@ namespace backend.Controllers
             var items = await _service.GetByMovieAsync(movieId);
             return Ok(ApiResponse<IEnumerable<ShowtimeDto>>.Success(items));
         }
-
+        [AllowAnonymous]
         [HttpGet("theater/{theaterId:long}")]
         //[Authorize]
         public async Task<IActionResult> GetByTheater(long theaterId)
@@ -51,6 +52,7 @@ namespace backend.Controllers
             var items = await _service.GetByTheaterAsync(theaterId);
             return Ok(ApiResponse<IEnumerable<ShowtimeDto>>.Success(items));
         }
+        [AllowAnonymous]
         [HttpGet("date")]
         //[Authorize]
         public async Task<IActionResult> GetByDate([FromQuery] DateTime date)
@@ -59,8 +61,8 @@ namespace backend.Controllers
             return Ok(new ApiResponse<IEnumerable<ShowtimeDto>>(200, "Success", items));
         }
 
+        [AllowAnonymous]
         [HttpGet("available")]
-        //[Authorize]
         public async Task<IActionResult> GetAvailable([FromQuery] DateTime? date)
         {
             var searchDate = (date ?? DateTime.Today).Date;
@@ -68,7 +70,7 @@ namespace backend.Controllers
             return Ok(new ApiResponse<IEnumerable<ShowtimeDto>>(200, "Success", items));
         }
 
-
+        [AllowAnonymous]
         [HttpGet("available/movies/{movieId:long}")]
         //[Authorize]
         public async Task<IActionResult> GetAvailableForMovie([FromRoute] long movieId, [FromQuery] DateTime? date)
@@ -77,14 +79,14 @@ namespace backend.Controllers
             var items = await _service.GetAvailableShowtimesForMovieAsync(movieId, searchDate);
             return Ok(new ApiResponse<IEnumerable<ShowtimeDto>>(200, "Success", items));
         }
-
+        [AllowAnonymous]
         [HttpGet("upcoming")]
         public async Task<IActionResult> GetUpcoming()
         {
             var items = await _service.GetUpcomingShowtimesAsync();
             return Ok(ApiResponse<IEnumerable<ShowtimeDto>>.Success(items));
         }
-
+        [AllowAnonymous]
         [HttpGet("upcoming/movie/{movieId:long}")]
         public async Task<IActionResult> GetUpcomingByMovie(long movieId)
         {

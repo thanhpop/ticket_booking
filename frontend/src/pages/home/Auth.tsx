@@ -10,14 +10,7 @@ import {
   faVenus,
   faGenderless,
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  message,
-  Tabs,
-  Input,
-  Button,
-  DatePicker,
-  Select,
-} from "antd";
+import { message, Tabs, Input, Button, DatePicker, Select } from "antd";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
@@ -97,7 +90,7 @@ const Auth: React.FC = () => {
         userId: data.userId,
         username: data.username,
         email: data.email,
-        token: data.accessToken,
+        accessToken: data.accessToken,
         refreshToken: data.refreshToken,
       };
 

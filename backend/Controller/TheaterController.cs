@@ -1,10 +1,12 @@
 ﻿using backend.DTO;
 using backend.Helpers;
 using backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TheaterController : ControllerBase
@@ -17,14 +19,14 @@ namespace backend.Controllers
             _service = service;
             _logger = logger;
         }
-
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var data = await _service.GetAllAsync();
             return Ok(ApiResponse<IEnumerable<TheaterDto>>.Success(data));
         }
-
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(long id)
         {
@@ -34,7 +36,7 @@ namespace backend.Controllers
 
             return Ok(ApiResponse<TheaterDto>.Success(item));
         }
-
+        [AllowAnonymous]
         [HttpGet("search")]
         public async Task<IActionResult> GetByLocation([FromQuery] string location)
         {

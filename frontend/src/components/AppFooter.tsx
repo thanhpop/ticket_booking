@@ -17,11 +17,7 @@ const AppFooter: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4">
         <Row gutter={[48, 32]}>
           <Col xs={24} md={8}>
-            {/* --- THAY THẾ TEXT BẰNG IMAGE --- */}
-
             <img src={logoImage} alt="Logo" className="h-40 w-auto " />
-
-            {/* ------------------------------- */}
 
             <p className="text-gray-400 leading-relaxed mb-6">
               Hệ thống rạp chiếu phim tiêu chuẩn quốc tế. Cam kết mang lại trải

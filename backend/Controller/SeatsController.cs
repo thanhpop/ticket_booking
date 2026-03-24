@@ -2,10 +2,12 @@
 using backend.Helpers;
 using backend.Service.Interfaces;
 using backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class SeatsController : ControllerBase

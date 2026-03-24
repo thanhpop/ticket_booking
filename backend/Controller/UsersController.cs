@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controller
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase

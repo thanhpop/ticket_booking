@@ -50,7 +50,7 @@ export default function NewsDetailPage() {
       <AppHeader />
 
       <Content>
-        <div className="bg-gray-50 border-b">
+        <div className="bg-gray-50 border-b border-gray-200">
           <div className="max-w-5xl mx-auto px-4 py-6">
             <Button
               icon={<ArrowLeftOutlined />}

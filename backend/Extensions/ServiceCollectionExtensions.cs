@@ -25,6 +25,7 @@ namespace backend.Extensions
             services.AddScoped<SeatSessionService>();
             services.AddSingleton<SeatEventService>();
             services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IDashboardReportService, DashboardReportService>();
             return services;
         }
     }

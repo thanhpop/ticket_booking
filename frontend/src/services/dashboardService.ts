@@ -48,4 +48,10 @@ export const dashboardService = {
     const res = await instance.get("/admin/dashboard");
     return res.data;
   },
+  exportPdf: async (): Promise<Blob> => {
+    const res = await instance.get("/report/dashboard-pdf", {
+      responseType: "blob", 
+    });
+    return res.data;
+  },
 };

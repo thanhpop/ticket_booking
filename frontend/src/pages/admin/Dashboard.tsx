@@ -19,12 +19,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import jsPDF from "jspdf";
-import { toPng } from "html-to-image";
-
 import { useDashboard } from "../../hooks/useDashboard";
 import type { MoviePerformance } from "../../services/dashboardService";
 import type { TheaterPerformance } from "../../services/dashboardService";
+import { dashboardService } from "../../services/dashboardService";
 
 const { Title, Text } = Typography;
 
@@ -34,36 +32,32 @@ const AdminDashboard: React.FC = () => {
   const reportRef = useRef<HTMLDivElement>(null);
 
   const handleExportPDF = async () => {
-    if (!reportRef.current) return;
-
     setExporting(true);
-    const hide = message.loading("Đang chuẩn bị dữ liệu báo cáo...", 0);
+    const hide = message.loading("Đang tải báo cáo từ hệ thống...", 0);
 
     try {
-      const dataUrl = await toPng(reportRef.current, {
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: "#f9fafb",
-        cacheBust: true,
-      });
+      const blob = await dashboardService.exportPdf();
 
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "px",
-        format: "a4",
-      });
+      const url = window.URL.createObjectURL(blob);
 
-      const imgProps = pdf.getImageProperties(dataUrl);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const link = document.createElement("a");
+      link.href = url;
 
-      pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Bao-cao-${new Date().getTime()}.pdf`);
+      const dateString = new Date().toISOString().split("T")[0];
+      link.setAttribute("download", `Bao-cao-cinema-${dateString}.pdf`);
 
-      message.success("Xuất báo cáo thành công!");
+      document.body.appendChild(link);
+      link.click();
+
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+      window.URL.revokeObjectURL(url);
+
+      message.success("Tải báo cáo thành công!");
     } catch (error) {
       console.error("Export PDF error:", error);
-      message.error("Lỗi khi tạo PDF. Vui lòng thử lại.");
+      message.error("Lỗi khi kết nối với máy chủ báo cáo.");
     } finally {
       setExporting(false);
       hide();

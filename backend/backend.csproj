@@ -31,6 +31,8 @@
     <PackageReference Include="MySql.EntityFrameworkCore" Version="9.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+    <PackageReference Include="QuestPDF" Version="2026.2.4" />
+    <PackageReference Include="ScottPlot" Version="5.1.58" />
     <PackageReference Include="StackExchange.Redis" Version="2.11.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     <PackageReference Include="VNPAY.NET" Version="8.5.0" />

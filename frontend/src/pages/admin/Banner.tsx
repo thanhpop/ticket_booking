@@ -13,8 +13,8 @@ import {
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import type { ColumnsType } from "antd/es/table";
-import type { Banner } from "../../types/Banner";
-import { bannerService } from "../../services/bannerService";
+import type { Banner } from "@/types/Banner";
+import { bannerService } from "@/services/bannerService";
 import { Typography, Row, Col, Select, Tag } from "antd";
 
 export default function BannerPage() {

@@ -1,38 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Layout, Menu, Button } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { LogoutOutlined } from "@ant-design/icons";
 import logoImage from "../assets/logo2.png";
+import { useAuth } from "@/context/AuthContext";
 
 const { Header } = Layout;
-
-interface StoredUser {
-  userId: number;
-  username: string;
-  email: string;
-  token: string;
-  refreshToken: string;
-}
 
 const AppHeader: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState<StoredUser | null>(null);
-
-  useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        setUser(JSON.parse(userStr));
-      } catch {
-        localStorage.removeItem("user");
-      }
-    }
-  }, []);
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
+    logout();
     navigate("/login");
   };
 

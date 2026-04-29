@@ -25,10 +25,9 @@ import {
 } from "@ant-design/icons";
 import type { TabsProps } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import AppHeader from "../../components/AppHeader";
-import AppFooter from "../../components/AppFooter";
-import { reservationService } from "../../services/reservationService";
-import type { ReservationResponse } from "../../services/reservationService";
+
+import { reservationService } from "@/services/reservationService";
+import type { ReservationResponse } from "@/services/reservationService";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -250,63 +249,57 @@ const ProfilePage: React.FC = () => {
   if (!user) return null;
 
   return (
-    <Layout className="min-h-screen bg-gray-50">
-      <AppHeader />
+    <Content className="py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={8}>
+            <Card className="shadow-sm border-gray-200 text-center">
+              <div className="flex flex-col items-center">
+                <Avatar
+                  size={100}
+                  icon={<UserOutlined />}
+                  className="bg-blue-100 text-blue-600 mb-4"
+                />
+                <Title level={4} className="mb-1">
+                  {user.username}
+                </Title>
+                <Text type="secondary" className="mb-4">
+                  {user.email}
+                </Text>
 
-      <Content className="py-8">
-        <div className="max-w-6xl mx-auto px-4">
-          <Row gutter={[24, 24]}>
-            <Col xs={24} lg={8}>
-              <Card className="shadow-sm border-gray-200 text-center">
-                <div className="flex flex-col items-center">
-                  <Avatar
-                    size={100}
-                    icon={<UserOutlined />}
-                    className="bg-blue-100 text-blue-600 mb-4"
-                  />
-                  <Title level={4} className="mb-1">
-                    {user.username}
-                  </Title>
-                  <Text type="secondary" className="mb-4">
-                    {user.email}
-                  </Text>
+                <Row gutter={16} className="w-full mt-4 mb-6">
+                  <Col span={12}>
+                    <Statistic
+                      title="Vé đã mua"
+                      value={totalTickets}
+                      prefix={<HistoryOutlined />}
+                      valueStyle={{ fontSize: 18 }}
+                    />
+                  </Col>
+                  <Col span={12}>
+                    <Statistic
+                      title="Chi tiêu"
+                      value={totalSpent}
+                      prefix={<DollarOutlined />}
+                      valueStyle={{ fontSize: 18 }}
+                      formatter={(value) =>
+                        `${Number(value).toLocaleString()} đ`
+                      }
+                    />
+                  </Col>
+                </Row>
+              </div>
+            </Card>
+          </Col>
 
-                  <Row gutter={16} className="w-full mt-4 mb-6">
-                    <Col span={12}>
-                      <Statistic
-                        title="Vé đã mua"
-                        value={totalTickets}
-                        prefix={<HistoryOutlined />}
-                        valueStyle={{ fontSize: 18 }}
-                      />
-                    </Col>
-                    <Col span={12}>
-                      <Statistic
-                        title="Chi tiêu"
-                        value={totalSpent}
-                        prefix={<DollarOutlined />}
-                        valueStyle={{ fontSize: 18 }}
-                        formatter={(value) =>
-                          `${Number(value).toLocaleString()} đ`
-                        }
-                      />
-                    </Col>
-                  </Row>
-                </div>
-              </Card>
-            </Col>
-
-            <Col xs={24} lg={16}>
-              <Card className="shadow-sm border-gray-200 min-h-[500px]">
-                <Tabs defaultActiveKey="1" items={items} />
-              </Card>
-            </Col>
-          </Row>
-        </div>
-      </Content>
-
-      <AppFooter />
-    </Layout>
+          <Col xs={24} lg={16}>
+            <Card className="shadow-sm border-gray-200 min-h-[500px]">
+              <Tabs defaultActiveKey="1" items={items} />
+            </Card>
+          </Col>
+        </Row>
+      </div>
+    </Content>
   );
 };
 

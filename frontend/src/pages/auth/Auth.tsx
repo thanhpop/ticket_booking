@@ -13,11 +13,8 @@ import {
 import { message, Tabs, Input, Button, DatePicker, Select } from "antd";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-
-import { Layout } from "antd";
-import { authService } from "../../services/authService";
-import AppHeader from "../../components/AppHeader";
-import AppFooter from "../../components/AppFooter";
+import { useAuth } from "@/context/AuthContext";
+import { authService } from "@/services/authService";
 
 const { Option } = Select;
 
@@ -38,6 +35,7 @@ interface RegisterForm {
 }
 
 const Auth: React.FC = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("login");
 
@@ -86,15 +84,12 @@ const Auth: React.FC = () => {
         password: loginForm.password,
       });
 
-      const userToStore = {
+      login({
         userId: data.userId,
         username: data.username,
         email: data.email,
         accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-      };
-
-      localStorage.setItem("user", JSON.stringify(userToStore));
+      });
 
       message.success("Đăng nhập thành công");
       navigate("/", { replace: true });
@@ -140,37 +135,88 @@ const Auth: React.FC = () => {
   };
 
   return (
-    <Layout className="min-h-screen bg-gray-50">
-      <AppHeader />
+    <div
+      className="flex flex-col items-center justify-center py-10 px-4 sm:px-6 lg:px-8"
+      style={{ minHeight: "calc(100vh - 64px)" }}
+    >
+      <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="px-8 pt-6 pb-2 bg-white">
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            centered
+            size="large"
+            items={[
+              { label: "ĐĂNG NHẬP", key: "login" },
+              { label: "ĐĂNG KÝ", key: "register" },
+            ]}
+            className="font-medium"
+          />
+        </div>
 
-      <div
-        className="flex flex-col items-center justify-center py-10 px-4 sm:px-6 lg:px-8"
-        style={{ minHeight: "calc(100vh - 64px)" }}
-      >
-        <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="px-8 pt-6 pb-2 bg-white">
-            <Tabs
-              activeKey={activeTab}
-              onChange={setActiveTab}
-              centered
-              size="large"
-              items={[
-                { label: "ĐĂNG NHẬP", key: "login" },
-                { label: "ĐĂNG KÝ", key: "register" },
-              ]}
-              className="font-medium"
-            />
-          </div>
+        <div className="p-8 pt-4">
+          {activeTab === "login" ? (
+            <form onSubmit={handleLoginSubmit} className="flex flex-col gap-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Tên đăng nhập
+                </label>
+                <Input
+                  size="large"
+                  prefix={
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      className="text-gray-400 mr-2"
+                    />
+                  }
+                  placeholder="Nhập tên đăng nhập"
+                  name="username"
+                  value={loginForm.username}
+                  onChange={handleLoginChange}
+                  className="hover:border-[#03599d] focus:border-[#03599d]"
+                />
+              </div>
 
-          <div className="p-8 pt-4">
-            {activeTab === "login" ? (
-              <form
-                onSubmit={handleLoginSubmit}
-                className="flex flex-col gap-5"
-              >
-                <div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Mật khẩu
+                </label>
+                <Input.Password
+                  size="large"
+                  prefix={
+                    <FontAwesomeIcon
+                      icon={faLock}
+                      className="text-gray-400 mr-2"
+                    />
+                  }
+                  placeholder="Nhập mật khẩu"
+                  name="password"
+                  value={loginForm.password}
+                  onChange={handleLoginChange}
+                />
+              </div>
+
+              <div className="mt-4">
+                <Button
+                  htmlType="submit"
+                  block
+                  size="large"
+                  style={gradientButtonStyle}
+                  className="h-12 text-base hover:opacity-90 transition-opacity"
+                >
+                  ĐĂNG NHẬP
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <form
+              onSubmit={handleRegisterSubmit}
+              className="flex flex-col gap-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Tên đăng nhập
+                    Tên đăng nhập <span className="text-red-500">*</span>
                   </label>
                   <Input
                     size="large"
@@ -182,15 +228,33 @@ const Auth: React.FC = () => {
                     }
                     placeholder="Nhập tên đăng nhập"
                     name="username"
-                    value={loginForm.username}
-                    onChange={handleLoginChange}
-                    className="hover:border-[#03599d] focus:border-[#03599d]"
+                    value={registerForm.username}
+                    onChange={handleRegisterChange}
+                  />
+                </div>
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    size="large"
+                    prefix={
+                      <FontAwesomeIcon
+                        icon={faEnvelope}
+                        className="text-gray-400 mr-2"
+                      />
+                    }
+                    placeholder="example@email.com"
+                    name="email"
+                    type="email"
+                    value={registerForm.email}
+                    onChange={handleRegisterChange}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Mật khẩu
+                    Mật khẩu <span className="text-red-500">*</span>
                   </label>
                   <Input.Password
                     size="large"
@@ -200,194 +264,117 @@ const Auth: React.FC = () => {
                         className="text-gray-400 mr-2"
                       />
                     }
-                    placeholder="Nhập mật khẩu"
+                    placeholder="Mật khẩu"
                     name="password"
-                    value={loginForm.password}
-                    onChange={handleLoginChange}
+                    value={registerForm.password}
+                    onChange={handleRegisterChange}
                   />
                 </div>
 
-                <div className="mt-4">
-                  <Button
-                    htmlType="submit"
-                    block
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Xác nhận mật khẩu <span className="text-red-500">*</span>
+                  </label>
+                  <Input.Password
                     size="large"
-                    style={gradientButtonStyle}
-                    className="h-12 text-base hover:opacity-90 transition-opacity"
-                  >
-                    ĐĂNG NHẬP
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <form
-                onSubmit={handleRegisterSubmit}
-                className="flex flex-col gap-4"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="col-span-1 md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Tên đăng nhập <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      size="large"
-                      prefix={
-                        <FontAwesomeIcon
-                          icon={faUser}
-                          className="text-gray-400 mr-2"
-                        />
-                      }
-                      placeholder="Nhập tên đăng nhập"
-                      name="username"
-                      value={registerForm.username}
-                      onChange={handleRegisterChange}
-                    />
-                  </div>
-                  <div className="col-span-1 md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Email <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      size="large"
-                      prefix={
-                        <FontAwesomeIcon
-                          icon={faEnvelope}
-                          className="text-gray-400 mr-2"
-                        />
-                      }
-                      placeholder="example@email.com"
-                      name="email"
-                      type="email"
-                      value={registerForm.email}
-                      onChange={handleRegisterChange}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Mật khẩu <span className="text-red-500">*</span>
-                    </label>
-                    <Input.Password
-                      size="large"
-                      prefix={
-                        <FontAwesomeIcon
-                          icon={faLock}
-                          className="text-gray-400 mr-2"
-                        />
-                      }
-                      placeholder="Mật khẩu"
-                      name="password"
-                      value={registerForm.password}
-                      onChange={handleRegisterChange}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Xác nhận mật khẩu <span className="text-red-500">*</span>
-                    </label>
-                    <Input.Password
-                      size="large"
-                      prefix={
-                        <FontAwesomeIcon
-                          icon={faLock}
-                          className="text-gray-400 mr-2"
-                        />
-                      }
-                      placeholder="Nhập lại mật khẩu"
-                      name="confirmPassword"
-                      value={registerForm.confirmPassword}
-                      onChange={handleRegisterChange}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Ngày sinh <span className="text-red-500">*</span>
-                    </label>
-                    <DatePicker
-                      size="large"
-                      className="w-full"
-                      placeholder="Chọn ngày sinh"
-                      format="YYYY-MM-DD"
-                      value={registerForm.dob ? dayjs(registerForm.dob) : null}
-                      onChange={handleDateChange}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Giới tính
-                    </label>
-                    <Select
-                      size="large"
-                      className="w-full"
-                      placeholder="Chọn giới tính"
-                      value={registerForm.gender || undefined}
-                      onChange={(val) => handleSelectChange(val, "gender")}
-                    >
-                      <Option value="male">
-                        <FontAwesomeIcon
-                          icon={faMars}
-                          className="mr-2 text-blue-500"
-                        />{" "}
-                        Nam
-                      </Option>
-                      <Option value="female">
-                        <FontAwesomeIcon
-                          icon={faVenus}
-                          className="mr-2 text-pink-500"
-                        />{" "}
-                        Nữ
-                      </Option>
-                      <Option value="other">
-                        <FontAwesomeIcon
-                          icon={faGenderless}
-                          className="mr-2 text-gray-500"
-                        />{" "}
-                        Khác
-                      </Option>
-                    </Select>
-                  </div>
-
-                  <div className="col-span-1 md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Số điện thoại <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      size="large"
-                      prefix={
-                        <FontAwesomeIcon
-                          icon={faPhoneSquare}
-                          className="text-gray-400 mr-2"
-                        />
-                      }
-                      placeholder="0912 xxx xxx"
-                      name="phone"
-                      value={registerForm.phone}
-                      onChange={handleRegisterChange}
-                    />
-                  </div>
+                    prefix={
+                      <FontAwesomeIcon
+                        icon={faLock}
+                        className="text-gray-400 mr-2"
+                      />
+                    }
+                    placeholder="Nhập lại mật khẩu"
+                    name="confirmPassword"
+                    value={registerForm.confirmPassword}
+                    onChange={handleRegisterChange}
+                  />
                 </div>
 
-                <div className="mt-6">
-                  <Button
-                    htmlType="submit"
-                    block
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Ngày sinh <span className="text-red-500">*</span>
+                  </label>
+                  <DatePicker
                     size="large"
-                    style={gradientButtonStyle}
-                    className="h-12 text-base hover:opacity-90 transition-opacity"
-                  >
-                    ĐĂNG KÝ
-                  </Button>
+                    className="w-full"
+                    placeholder="Chọn ngày sinh"
+                    format="YYYY-MM-DD"
+                    value={registerForm.dob ? dayjs(registerForm.dob) : null}
+                    onChange={handleDateChange}
+                  />
                 </div>
-              </form>
-            )}
-          </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Giới tính
+                  </label>
+                  <Select
+                    size="large"
+                    className="w-full"
+                    placeholder="Chọn giới tính"
+                    value={registerForm.gender || undefined}
+                    onChange={(val) => handleSelectChange(val, "gender")}
+                  >
+                    <Option value="male">
+                      <FontAwesomeIcon
+                        icon={faMars}
+                        className="mr-2 text-blue-500"
+                      />{" "}
+                      Nam
+                    </Option>
+                    <Option value="female">
+                      <FontAwesomeIcon
+                        icon={faVenus}
+                        className="mr-2 text-pink-500"
+                      />{" "}
+                      Nữ
+                    </Option>
+                    <Option value="other">
+                      <FontAwesomeIcon
+                        icon={faGenderless}
+                        className="mr-2 text-gray-500"
+                      />{" "}
+                      Khác
+                    </Option>
+                  </Select>
+                </div>
+
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Số điện thoại <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    size="large"
+                    prefix={
+                      <FontAwesomeIcon
+                        icon={faPhoneSquare}
+                        className="text-gray-400 mr-2"
+                      />
+                    }
+                    placeholder="0912 xxx xxx"
+                    name="phone"
+                    value={registerForm.phone}
+                    onChange={handleRegisterChange}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <Button
+                  htmlType="submit"
+                  block
+                  size="large"
+                  style={gradientButtonStyle}
+                  className="h-12 text-base hover:opacity-90 transition-opacity"
+                >
+                  ĐĂNG KÝ
+                </Button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
-      <AppFooter />
-    </Layout>
+    </div>
   );
 };
 

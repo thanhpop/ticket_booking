@@ -13,10 +13,8 @@ import {
   Spin,
 } from "antd";
 import { CalendarOutlined, ArrowRightOutlined } from "@ant-design/icons";
-import AppHeader from "../../components/AppHeader";
-import AppFooter from "../../components/AppFooter";
-import { newsService } from "../../services/newsService";
-import type { News } from "../../types/News";
+import { newsService } from "@/services/newsService";
+import type { News } from "@/types/News";
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -97,53 +95,47 @@ const NewsPage: React.FC = () => {
         );
 
   return (
-    <Layout className="min-h-screen bg-white">
-      <AppHeader />
-
-      <Content>
-        <div className="bg-gray-50 py-8 border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4">
-            <Title level={2} className="border-l-4 border-blue-600 pl-4">
-              TIN TỨC & ƯU ĐÃI
-            </Title>
-          </div>
+    <Content>
+      <div className="bg-gray-50 py-8 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4">
+          <Title level={2} className="border-l-4 border-blue-600 pl-4">
+            TIN TỨC & ƯU ĐÃI
+          </Title>
         </div>
+      </div>
 
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <Tabs
-            defaultActiveKey="all"
-            onChange={setActiveTab}
-            items={[
-              { key: "all", label: "Tất cả" },
-              { key: "movie", label: "Điện ảnh" },
-              { key: "promotion", label: "Khuyến mãi" },
-            ]}
-            size="large"
-            className="mb-8"
-          />
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <Tabs
+          defaultActiveKey="all"
+          onChange={setActiveTab}
+          items={[
+            { key: "all", label: "Tất cả" },
+            { key: "movie", label: "Điện ảnh" },
+            { key: "promotion", label: "Khuyến mãi" },
+          ]}
+          size="large"
+          className="mb-8"
+        />
 
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <Row gutter={[32, 32]}>
-              {filteredNews.map((item) => (
-                <Col xs={24} sm={12} lg={8} key={item.id}>
-                  <NewsCard item={item} />
-                </Col>
-              ))}
-            </Row>
-          )}
-
-          <div className="flex justify-center mt-16">
-            <Pagination defaultCurrent={1} total={filteredNews.length} />
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Spin size="large" />
           </div>
-        </div>
-      </Content>
+        ) : (
+          <Row gutter={[32, 32]}>
+            {filteredNews.map((item) => (
+              <Col xs={24} sm={12} lg={8} key={item.id}>
+                <NewsCard item={item} />
+              </Col>
+            ))}
+          </Row>
+        )}
 
-      <AppFooter />
-    </Layout>
+        <div className="flex justify-center mt-16">
+          <Pagination defaultCurrent={1} total={filteredNews.length} />
+        </div>
+      </div>
+    </Content>
   );
 };
 

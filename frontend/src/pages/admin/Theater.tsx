@@ -21,16 +21,16 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import type { Theater } from "../../types/Theater";
-import theaterService from "../../services/theaterService";
-import { useAppDispatch } from "../../hooks/useAppDispatch";
-import { useAppSelector } from "../../hooks/useAppSelector";
+import type { Theater } from "@/types/Theater";
+import theaterService from "@/services/theaterService";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useAppSelector } from "@/hooks/useAppSelector";
 import {
   setTheaters,
   addTheater,
   updateTheater as updateTheaterAction,
   removeTheater,
-} from "../../features/theater/theaterSlice";
+} from "@/features/theater/theaterSlice";
 
 const { Title } = Typography;
 
@@ -77,7 +77,7 @@ const AdminTheaterPage: React.FC = () => {
       (t) =>
         (t.name ?? "").toLowerCase().includes(q) ||
         (t.location ?? "").toLowerCase().includes(q) ||
-        String(t.id ?? "").includes(q)
+        String(t.id ?? "").includes(q),
     );
   }, [theaters, search]);
 
@@ -126,7 +126,7 @@ const AdminTheaterPage: React.FC = () => {
       if (editing && editing.id) {
         const updated = await theaterService.updateTheater(
           Number(editing.id),
-          payload
+          payload,
         );
         dispatch(updateTheaterAction(updated));
         message.success("Cập nhật rạp thành công");

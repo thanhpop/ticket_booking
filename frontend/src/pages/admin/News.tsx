@@ -16,9 +16,9 @@ import {
 } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { newsService } from "../../services/newsService";
-import type { News } from "../../types/News";
-import QuillEditor from "../../components/QuillEditor";
+import { newsService } from "@/services/newsService";
+import type { News } from "@/types/News";
+import QuillEditor from "@/components/QuillEditor";
 
 const { Title } = Typography;
 const { TextArea } = Input;

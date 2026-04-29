@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Table, Typography, Spin, message, Input } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { userService, type User } from "../../services/userService";
+import { userService, type User } from "@/services/userService";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -28,7 +28,7 @@ const UserManagementPage: React.FC = () => {
   const filteredUsers = useMemo(() => {
     if (!searchText) return users;
     return users.filter((u) =>
-      u.username.toLowerCase().includes(searchText.toLowerCase())
+      u.username.toLowerCase().includes(searchText.toLowerCase()),
     );
   }, [users, searchText]);
 

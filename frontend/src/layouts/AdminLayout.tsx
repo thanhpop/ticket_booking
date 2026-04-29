@@ -13,7 +13,7 @@ import {
   AreaChartOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import logo from "../../assets/logo-cinema2.png";
+import logo from "@/assets/logo-cinema2.png";
 
 const { Header, Sider, Content } = Layout;
 

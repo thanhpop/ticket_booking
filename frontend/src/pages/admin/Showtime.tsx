@@ -20,10 +20,10 @@ import {
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
-import { movieService } from "../../services/movieService";
-import { theaterService } from "../../services/theaterService";
+import { movieService } from "@/services/movieService";
+import { theaterService } from "@/services/theaterService";
 
-import { showtimeService, type Showtime } from "../../services/showtimeService";
+import { showtimeService, type Showtime } from "@/services/showtimeService";
 
 const { Title } = Typography;
 

@@ -1,8 +1,8 @@
 import { useMemo, useEffect, useState, useRef, type JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Result, Button, message, Typography } from "antd";
-import { paymentService } from "../../services/paymentService";
-import { reservationService } from "../../services/reservationService";
+import { paymentService } from "@/services/paymentService";
+import { reservationService } from "@/services/reservationService";
 
 const { Text } = Typography;
 

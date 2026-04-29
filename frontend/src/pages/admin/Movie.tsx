@@ -31,17 +31,17 @@ import moment from "moment";
 import type { Moment } from "moment";
 import axios from "axios";
 import { z } from "zod";
-import type { Movie, ApiMovie } from "../../types/Movie";
+import type { Movie, ApiMovie } from "@/types/Movie";
 
-import { useAppDispatch } from "../../hooks/useAppDispatch";
-import { useAppSelector } from "../../hooks/useAppSelector";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useAppSelector } from "@/hooks/useAppSelector";
 import {
   setMovies,
   addMovie,
   updateMovie,
   removeMovie,
-} from "../../features/movies/moviesSlice";
-import movieService from "../../services/movieService";
+} from "@/features/movies/moviesSlice";
+import movieService from "@/services/movieService";
 
 const { Title } = Typography;
 const { Option } = Select;

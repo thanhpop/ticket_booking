@@ -2,15 +2,13 @@ import React, { useState } from "react";
 import { Layout, Button, Carousel, Tabs, Card, Modal, message } from "antd";
 import { PlayCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import type { TabsProps } from "antd";
-import AppHeader from "../../components/AppHeader";
 import { useNavigate } from "react-router-dom";
-import AppFooter from "../../components/AppFooter";
 
 import { useEffect } from "react";
-import { showtimeService } from "../../services/showtimeService";
-import movieService from "../../services/movieService";
-import type { Banner } from "../../types/Banner";
-import { bannerService } from "../../services/bannerService";
+import { showtimeService } from "@/services/showtimeService";
+import movieService from "@/services/movieService";
+import type { Banner } from "@/types/Banner";
+import { bannerService } from "@/services/bannerService";
 
 const { Content } = Layout;
 const { Meta } = Card;
@@ -252,47 +250,41 @@ const HomePage: React.FC = () => {
   ];
 
   return (
-    <Layout className="min-h-screen bg-white">
-      <AppHeader />
+    <Content>
+      <div className="relative">
+        <Carousel autoplay effect="fade" autoplaySpeed={5000}>
+          {banners.map((banner) => (
+            <div
+              key={banner.id}
+              className="h-[400px] md:h-[550px] w-full relative"
+            >
+              <img
+                src={banner.imageUrl}
+                alt={banner.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
+        </Carousel>
+      </div>
 
-      <Content>
-        <div className="relative">
-          <Carousel autoplay effect="fade" autoplaySpeed={5000}>
-            {banners.map((banner) => (
-              <div
-                key={banner.id}
-                className="h-[400px] md:h-[550px] w-full relative"
-              >
-                <img
-                  src={banner.imageUrl}
-                  alt={banner.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-          </Carousel>
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="mt-4">
+          <Tabs
+            defaultActiveKey="1"
+            items={tabItems}
+            centered
+            size="large"
+            tabBarStyle={{
+              marginBottom: 32,
+              fontWeight: "bold",
+              color: "#1677ff",
+            }}
+            className="custom-tabs"
+          />
         </div>
-
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="mt-4">
-            <Tabs
-              defaultActiveKey="1"
-              items={tabItems}
-              centered
-              size="large"
-              tabBarStyle={{
-                marginBottom: 32,
-                fontWeight: "bold",
-                color: "#1677ff",
-              }}
-              className="custom-tabs"
-            />
-          </div>
-        </div>
-      </Content>
-
-      <AppFooter />
-    </Layout>
+      </div>
+    </Content>
   );
 };
 

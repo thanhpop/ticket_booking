@@ -19,10 +19,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import { useDashboard } from "../../hooks/useDashboard";
-import type { MoviePerformance } from "../../services/dashboardService";
-import type { TheaterPerformance } from "../../services/dashboardService";
-import { dashboardService } from "../../services/dashboardService";
+import { useDashboard } from "@/hooks/useDashboard";
+import type { MoviePerformance } from "@/services/dashboardService";
+import type { TheaterPerformance } from "@/services/dashboardService";
+import { dashboardService } from "@/services/dashboardService";
 
 const { Title, Text } = Typography;
 

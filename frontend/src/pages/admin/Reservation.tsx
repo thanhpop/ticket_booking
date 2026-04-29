@@ -14,8 +14,8 @@ import {
 } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { reservationService } from "../../services/reservationService";
-import type { ReservationResponse } from "../../services/reservationService";
+import { reservationService } from "@/services/reservationService";
+import type { ReservationResponse } from "@/services/reservationService";
 
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";

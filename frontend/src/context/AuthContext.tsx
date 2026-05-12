@@ -5,6 +5,7 @@ interface StoredUser {
   username: string;
   email: string;
   accessToken: string;
+  role: string;
 }
 
 interface AuthContextType {

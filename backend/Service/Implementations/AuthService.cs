@@ -89,6 +89,7 @@ namespace backend.Service.Implementations
                 Username = user.username,
                 Email = user.email,
                 RefreshToken = refreshToken,
+                Role = user.Role?.name ?? string.Empty
             };
 
             return dtoResp;

@@ -12,6 +12,7 @@ function toAuthResponse(d: any): AuthResponse {
     userId: Number(d.userId),
     username: String(d.username ?? ""),
     email: String(d.email ?? ""),
+    role: String(d.role)
   };
 }
 

@@ -34,7 +34,7 @@ namespace backend.Controller
 
 
              var auth = await _auth.LoginAsync(dto);
-             if (auth == null) return Unauthorized(ApiResponse<object>.Fail("Invalid username/email or password"));
+             if (auth == null) return NotFound(ApiResponse<object>.Fail("Invalid username/email or password"));
 
              return Ok(ApiResponse<JwtResponseDto>.Success(auth));
         }

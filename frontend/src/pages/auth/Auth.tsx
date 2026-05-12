@@ -84,17 +84,25 @@ const Auth: React.FC = () => {
         password: loginForm.password,
       });
 
-      login({
+      const userData = {
         userId: data.userId,
         username: data.username,
         email: data.email,
         accessToken: data.accessToken,
-      });
+        role: data.role,
+      };
 
-      message.success("Đăng nhập thành công");
-      navigate("/", { replace: true });
+      login(userData);
+      if (userData.role === "ADMIN") {
+        message.success("Đăng nhập thành công!");
+        navigate("/admin", { replace: true });
+      } else {
+        message.success("Đăng nhập thành công!");
+        navigate("/", { replace: true });
+      }
     } catch (err: any) {
-      message.error(err.message || "Đăng nhập thất bại");
+      const errorMessage = err.response?.data?.message || "Đăng nhập thất bại";
+      message.error(errorMessage);
     }
   };
 

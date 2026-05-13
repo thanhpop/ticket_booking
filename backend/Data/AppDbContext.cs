@@ -24,7 +24,7 @@ namespace backend.Data
         public DbSet<Reservation> Reservations { get; set; } = null!;
         public DbSet<Banner> Banners { get; set; }
 
-        public DbSet<News> News { get; set; }
+        public DbSet<Article> Articles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,6 +1,6 @@
 ﻿namespace backend.DTO
 {
-    public class NewsDto
+    public class ArticlesDto
     {
         public int Id { get; set; }
         public string Title { get; set; } = null!;

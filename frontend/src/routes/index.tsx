@@ -15,10 +15,10 @@ import BookingPage from "@/pages/home/Booking.tsx";
 import ReservationPage from "@/pages/admin/Reservation.tsx";
 import ProfilePage from "@/pages/home/ProfilePage.tsx";
 import UserManagementPage from "@/pages/admin/User.tsx";
-import NewsPage from "@/pages/home/NewsPage.tsx";
+import ArticlePage from "@/pages/home/ArticlePage";
 import BannerPage from "@/pages/admin/Banner.tsx";
-import NewsManagementPage from "@/pages/admin/News.tsx";
-import NewsDetailPage from "@/pages/home/NewsDetailPage.tsx";
+import NewsManagementPage from "@/pages/admin/Article";
+import ArticleDetailPage from "@/pages/home/ArticleDetailPage";
 import AdminDashboard from "@/pages/admin/Dashboard.tsx";
 import MainLayout from "@/layouts/MainLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -35,8 +35,8 @@ const AppRoutes: React.FC = () => {
           <Route path="/booking/:showtimeId" element={<BookingPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
-        <Route path="/news" element={<NewsPage />} />
-        <Route path="/news/:id" element={<NewsDetailPage />} />
+        <Route path="/articles" element={<ArticlePage />} />
+        <Route path="/articles/:id" element={<ArticleDetailPage />} />
       </Route>
       <Route path="/paymentResult" element={<PaymentResult />} />
       <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>

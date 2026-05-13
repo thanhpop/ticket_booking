@@ -6,41 +6,41 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Service.Implementations
 {
-    public class NewsService : INewsService
+    public class ArticleService : IArticlesService
     {
         private readonly AppDbContext _context;
 
-        public NewsService(AppDbContext context)
+        public ArticleService(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<List<NewsDto>> GetAllAsync()
+        public async Task<List<ArticlesDto>> GetAllAsync()
         {
-            return await _context.News
+            return await _context.Articles
                 .OrderByDescending(n => n.CreatedAt)
                 .Select(n => ToDto(n))
                 .ToListAsync();
         }
 
-        public async Task<List<NewsDto>> GetActiveAsync()
+        public async Task<List<ArticlesDto>> GetActiveAsync()
         {
-            return await _context.News
+            return await _context.Articles
                 .Where(n => n.IsActive)
                 .OrderByDescending(n => n.CreatedAt)
                 .Select(n => ToDto(n))
                 .ToListAsync();
         }
 
-        public async Task<NewsDto?> GetByIdAsync(int id)
+        public async Task<ArticlesDto?> GetByIdAsync(int id)
         {
-            var news = await _context.News.FindAsync(id);
+            var news = await _context.Articles.FindAsync(id);
             return news == null ? null : ToDto(news);
         }
 
-        public async Task<NewsDto> CreateAsync(NewsDto dto)
+        public async Task<ArticlesDto> CreateAsync(ArticlesDto dto)
         {
-            var news = new News
+            var news = new Article
             {
                 Title = dto.Title,
                 Summary = dto.Summary,
@@ -50,15 +50,15 @@ namespace backend.Service.Implementations
                 IsActive = dto.IsActive
             };
 
-            _context.News.Add(news);
+            _context.Articles.Add(news);
             await _context.SaveChangesAsync();
 
             return ToDto(news);
         }
 
-        public async Task<NewsDto?> UpdateAsync(int id, NewsDto dto)
+        public async Task<ArticlesDto?> UpdateAsync(int id, ArticlesDto dto)
         {
-            var news = await _context.News.FindAsync(id);
+            var news = await _context.Articles.FindAsync(id);
             if (news == null) return null;
 
             news.Title = dto.Title;
@@ -74,15 +74,15 @@ namespace backend.Service.Implementations
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var news = await _context.News.FindAsync(id);
+            var news = await _context.Articles.FindAsync(id);
             if (news == null) return false;
 
-            _context.News.Remove(news);
+            _context.Articles.Remove(news);
             await _context.SaveChangesAsync();
             return true;
         }
 
-        private static NewsDto ToDto(News n) => new()
+        private static ArticlesDto ToDto(Article n) => new()
         {
             Id = n.Id,
             Title = n.Title,

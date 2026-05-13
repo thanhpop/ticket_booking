@@ -1,16 +1,5 @@
 # 🎬 Alpha Cinema
 
-# [✨ Features](#-features)
-
-- [🛠️ Tech Stack](#-tech-stack)
-- [📁 Project Structure](#-project-structure)
-- [🚀 Setup &amp; Installation](#-setup--installation)
-- [▶️ Running the Application](#-running-the-application)
-- [📚 API Documentation](#-api-documentation)
-- [🎯 Advanced Features](#-advanced-features)
-- [🐛 Troubleshooting](#-troubleshooting)
-- [👥 Contributors](#-contributors)
-
 ### Movie Theater Online Ticket Booking System
 
 <p align="center">
@@ -76,7 +65,6 @@
 ### ⚡ Realtime & Notifications
 
 - ✅ Realtime Seat Status Updates (Redis Pub/Sub)
-- ✅ WebSocket Support
 - ✅ Broadcast Notifications to All Clients
 - ✅ Double-Booking Prevention
 
@@ -251,41 +239,9 @@ cd Ticket-Booking
 mysql -u root -p < mysql-init/Schema.sql
 ```
 
-### 3️⃣ Configure Backend
+### 3️⃣Configure Backend
 
 Create or update `backend/appsettings.Development.json`:
-
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.EntityFrameworkCore": "Warning"
-    }
-  },
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Port=3306;Database=ticket_db;User=root;Password=your_password;"
-  },
-  "Jwt": {
-    "Key": "your-very-long-random-string-at-least-32-characters-long-for-jwt-secret!!!",
-    "Issuer": "ticket-booking-app",
-    "Audience": "ticket-booking-users",
-    "ExpireMinutes": 20
-  },
-  "Vnpay": {
-    "TmnCode": "NJJ0R8FS",
-    "HashSecret": "BYKJBHPPZKQMKBIBGGXIYKWYFAYSJXCW",
-    "BaseUrl": "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
-    "CallbackUrl": "http://localhost:8080/api/Vnpay/Callback",
-    "PaymentBackReturnUrl": "http://localhost:4200/paymentResult"
-  },
-  "Redis": {
-    "Connection": "localhost:6379"
-  },
-  "TimeZoneId": "SE Asia Standard Time",
-  "AllowedHosts": "*"
-}
-```
 
 ### 4️⃣ Install Dependencies
 
@@ -536,12 +492,6 @@ dotnet ef database update
 - **Developer**: Thành (@thanhpop)
 - **Repository**: [ticket_booking](https://github.com/thanhpop/ticket_booking)
 
----
-
-**Made with ❤️ by Thành**
-
 ⭐ If You Find This Project Helpful, Please Consider Giving It a Star!
-
-Last Updated: May 2026
 
 </div>

@@ -13,13 +13,13 @@ import {
   Spin,
 } from "antd";
 import { CalendarOutlined, ArrowRightOutlined } from "@ant-design/icons";
-import { newsService } from "@/services/newsService";
-import type { News } from "@/types/News";
+import { articleService } from "@/services/ArticleService";
+import type { Article } from "@/types/Article";
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
-const NewsCard: React.FC<{ item: News }> = ({ item }) => {
+const ArticleCard: React.FC<{ item: Article }> = ({ item }) => {
   const navigate = useNavigate();
 
   return (
@@ -40,7 +40,7 @@ const NewsCard: React.FC<{ item: News }> = ({ item }) => {
           </div>
         </div>
       }
-      onClick={() => navigate(`/news/${item.id}`)}
+      onClick={() => navigate(`/articles/${item.id}`)}
     >
       <div className="flex flex-col h-full">
         <Title level={5} className="line-clamp-2 mb-2">
@@ -64,16 +64,16 @@ const NewsCard: React.FC<{ item: News }> = ({ item }) => {
   );
 };
 
-const NewsPage: React.FC = () => {
+const ArticlePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("all");
-  const [news, setNews] = useState<News[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchNews = async () => {
+  const fetchArticles = async () => {
     try {
       setLoading(true);
-      const res = await newsService.getActive();
-      setNews(res.data.data || []);
+      const res = await articleService.getActive();
+      setArticles(res.data.data || []);
     } catch {
       message.error("Không tải được tin tức");
     } finally {
@@ -82,13 +82,13 @@ const NewsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchNews();
+    fetchArticles();
   }, []);
 
-  const filteredNews =
+  const filteredArticles =
     activeTab === "all"
-      ? news
-      : news.filter(
+      ? articles
+      : articles.filter(
           (n) =>
             (activeTab === "movie" && n.category === "Movie") ||
             (activeTab === "promotion" && n.category === "Promotion"),
@@ -123,20 +123,20 @@ const NewsPage: React.FC = () => {
           </div>
         ) : (
           <Row gutter={[32, 32]}>
-            {filteredNews.map((item) => (
+            {filteredArticles.map((item) => (
               <Col xs={24} sm={12} lg={8} key={item.id}>
-                <NewsCard item={item} />
+                <ArticleCard item={item} />
               </Col>
             ))}
           </Row>
         )}
 
         <div className="flex justify-center mt-16">
-          <Pagination defaultCurrent={1} total={filteredNews.length} />
+          <Pagination defaultCurrent={1} total={filteredArticles.length} />
         </div>
       </div>
     </Content>
   );
 };
 
-export default NewsPage;
+export default ArticlePage;

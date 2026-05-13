@@ -4,24 +4,24 @@ import { Layout, Typography, Tag, Spin, Button, Divider } from "antd";
 import { ArrowLeftOutlined, CalendarOutlined } from "@ant-design/icons";
 import AppHeader from "@/components/AppHeader";
 import AppFooter from "@/components/AppFooter";
-import { newsService } from "@/services/newsService";
-import type { News } from "@/types/News";
+import { articleService } from "@/services/ArticleService";
+import type { Article } from "@/types/Article";
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
-export default function NewsDetailPage() {
+export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [news, setNews] = useState<News | null>(null);
+  const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchDetail = async () => {
     try {
       setLoading(true);
-      const res = await newsService.getById(Number(id));
-      setNews(res.data.data);
+      const res = await articleService.getById(Number(id));
+      setArticle(res.data.data);
     } catch {
       navigate("/404");
     } finally {
@@ -33,7 +33,7 @@ export default function NewsDetailPage() {
     if (id) fetchDetail();
   }, [id]);
 
-  if (loading || !news) {
+  if (loading || !article) {
     return (
       <Layout className="min-h-screen">
         <AppHeader />
@@ -58,16 +58,16 @@ export default function NewsDetailPage() {
           </Button>
 
           <Title level={2} className="mt-2">
-            {news.title}
+            {article.title}
           </Title>
 
           <div className="flex items-center gap-4 text-gray-500 mt-2">
-            <Tag color={news.category === "Promotion" ? "red" : "blue"}>
-              {news.category === "Promotion" ? "Khuyến mãi" : "Điện ảnh"}
+            <Tag color={article.category === "Promotion" ? "red" : "blue"}>
+              {article.category === "Promotion" ? "Khuyến mãi" : "Điện ảnh"}
             </Tag>
             <span className="flex items-center gap-1">
               <CalendarOutlined />
-              {news.createdAt}
+              {article.createdAt}
             </span>
           </div>
         </div>
@@ -75,20 +75,20 @@ export default function NewsDetailPage() {
 
       <div className="max-w-5xl mx-auto px-4 py-10">
         <img
-          src={news.imageUrl}
-          alt={news.title}
+          src={article.imageUrl}
+          alt={article.title}
           className="w-full max-h-[420px] object-cover rounded-xl mb-8"
         />
 
         <Paragraph className="text-lg text-gray-600 font-medium mb-6">
-          {news.summary}
+          {article.summary}
         </Paragraph>
 
         <Divider />
 
         <div
           className="prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: news.content }}
+          dangerouslySetInnerHTML={{ __html: article.content }}
         />
       </div>
     </Content>

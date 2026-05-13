@@ -16,27 +16,27 @@ import {
 } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { newsService } from "@/services/newsService";
-import type { News } from "@/types/News";
+import { articleService } from "@/services/ArticleService";
+import type { Article } from "@/types/Article";
 import QuillEditor from "@/components/QuillEditor";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 
-export default function NewsManagementPage() {
-  const [data, setData] = useState<News[]>([]);
+export default function ArticleManagementPage() {
+  const [data, setData] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<News | null>(null);
+  const [editing, setEditing] = useState<Article | null>(null);
   const [content, setContent] = useState("");
 
   const [form] = Form.useForm();
 
-  const fetchNews = async () => {
+  const fetchArticles = async () => {
     try {
       setLoading(true);
-      const res = await newsService.getAll();
+      const res = await articleService.getAll();
       setData(res.data.data);
     } catch {
       message.error("Không tải được danh sách bài viết");
@@ -46,7 +46,7 @@ export default function NewsManagementPage() {
   };
 
   useEffect(() => {
-    fetchNews();
+    fetchArticles();
   }, []);
 
   const openCreate = () => {
@@ -57,10 +57,10 @@ export default function NewsManagementPage() {
     setOpen(true);
   };
 
-  const openEdit = (news: News) => {
-    setEditing(news);
-    setContent(news.content);
-    form.setFieldsValue(news);
+  const openEdit = (article: Article) => {
+    setEditing(article);
+    setContent(article.content);
+    form.setFieldsValue(article);
     setOpen(true);
   };
 
@@ -74,15 +74,15 @@ export default function NewsManagementPage() {
 
     try {
       if (editing) {
-        await newsService.update(editing.id, payload);
+        await articleService.update(editing.id, payload);
         message.success("Cập nhật bài viết thành công");
       } else {
-        await newsService.create(payload);
+        await articleService.create(payload);
         message.success("Thêm bài viết thành công");
       }
 
       setOpen(false);
-      fetchNews();
+      fetchArticles();
     } catch {
       message.error("Thao tác thất bại");
     }
@@ -90,15 +90,15 @@ export default function NewsManagementPage() {
 
   const handleDelete = async (id: number) => {
     try {
-      await newsService.delete(id);
+      await articleService.delete(id);
       message.success("Xóa bài viết thành công");
-      fetchNews();
+      fetchArticles();
     } catch {
       message.error("Xóa thất bại");
     }
   };
 
-  const columns: ColumnsType<News> = [
+  const columns: ColumnsType<Article> = [
     {
       title: "Ảnh",
       dataIndex: "imageUrl",

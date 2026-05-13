@@ -49,9 +49,9 @@ const AppHeader: React.FC = () => {
           items={[
             { key: "home", label: "Trang Chủ", onClick: () => navigate("/") },
             {
-              key: "news",
+              key: "articles",
               label: "Tin Tức và ưu đãi",
-              onClick: () => navigate("/news"),
+              onClick: () => navigate("/articles"),
             },
           ]}
         />

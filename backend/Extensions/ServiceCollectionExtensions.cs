@@ -21,7 +21,7 @@ namespace backend.Extensions
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IReservationService, ReservationService>();
             services.AddScoped<IBannerService, BannerService>();
-            services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<IArticlesService, ArticleService>();
             services.AddScoped<SeatSessionService>();
             services.AddSingleton<SeatEventService>();
             services.AddScoped<IDashboardService, DashboardService>();

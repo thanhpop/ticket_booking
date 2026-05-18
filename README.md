@@ -95,21 +95,19 @@
 
 ### ⚛️ Frontend Stack
 
-| Technology       | Version | Purpose           |
-| ---------------- | ------- | ----------------- |
-| React            | 19.1+   | UI Framework      |
-| TypeScript       | 5.8+    | Type Safety       |
-| Vite             | 7.0+    | Build Tool        |
-| Ant Design       | 5.26+   | UI Components     |
-| TailwindCSS      | 4.1+    | Styling           |
-| Redux Toolkit    | 2.8+    | State Management  |
-| React Router     | 7.7+    | Navigation        |
-| Axios            | 1.10+   | HTTP Client       |
-| React Hook Form  | 7.62+   | Form Management   |
-| Zod              | 4.0+    | Schema Validation |
-| Recharts         | 3.8+    | Chart Library     |
-| Socket.io Client | 1.6+    | WebSocket         |
-| jsPDF            | 4.2+    | PDF Export        |
+| Technology      | Version | Purpose           |
+| --------------- | ------- | ----------------- |
+| React           | 19.1+   | UI Framework      |
+| TypeScript      | 5.8+    | Type Safety       |
+| Vite            | 7.0+    | Build Tool        |
+| Ant Design      | 5.26+   | UI Components     |
+| TailwindCSS     | 4.1+    | Styling           |
+| Redux Toolkit   | 2.8+    | State Management  |
+| React Router    | 7.7+    | Navigation        |
+| Axios           | 1.10+   | HTTP Client       |
+| React Hook Form | 7.62+   | Form Management   |
+| Zod             | 4.0+    | Schema Validation |
+| Recharts        | 3.8+    | Chart Library     |
 
 ### 🚀 DevOps & Deployment
 
@@ -489,8 +487,8 @@ dotnet ef database update
 
 ## 👥 Contributors
 
-- **Developer**: Thành (@thanhpop)
-- **Repository**: [ticket_booking](https://github.com/thanhpop/ticket_booking)
+- **Developer**: Hoàng Minh Thành (@thanhpop)
+- **Repository**: [alpha_cinema](https://github.com/thanhpop/ticket_booking)
 
 ⭐ If You Find This Project Helpful, Please Consider Giving It a Star!
 

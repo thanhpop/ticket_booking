@@ -2,7 +2,7 @@ import React from "react";
 import { Layout, Menu, Button } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { LogoutOutlined } from "@ant-design/icons";
-import logoImage from "../assets/logo2.png";
+import logoImage from "@/assets/logo2.png";
 import { useAuth } from "@/context/AuthContext";
 
 const { Header } = Layout;

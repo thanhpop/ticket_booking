@@ -5,7 +5,7 @@ import {
   InstagramFilled,
   YoutubeFilled,
 } from "@ant-design/icons";
-import logoImage from "../assets/logo-cinema2.png";
+import logoImage from "@/assets/logo-cinema2.png";
 const { Footer } = Layout;
 
 const AppFooter: React.FC = () => {

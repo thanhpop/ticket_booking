@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { Theater } from "../../types/Theater";
+import type { Theater } from "@/types/Theater";
 
 interface TheaterState {
     items: Theater[];

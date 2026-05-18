@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Layout, Button, Carousel, Tabs, Card, Modal, message } from "antd";
+import { Layout, Button, Carousel, Tabs, Card, Modal } from "antd";
 import { PlayCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import type { TabsProps } from "antd";
 import { useNavigate } from "react-router-dom";

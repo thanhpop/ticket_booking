@@ -1,4 +1,4 @@
-import instance from "../config/axios";
+import instance from "@/config/axios";
 
 
 export const seatService = {

@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = (userData: StoredUser) => {
     localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData); // Cập nhật state ngay lập tức để Header nhận được
+    setUser(userData);
   };
 
   const logout = () => {

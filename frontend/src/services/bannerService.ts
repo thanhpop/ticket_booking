@@ -1,7 +1,7 @@
 
-import instance from "../config/axios";
+import instance from "@/config/axios";
 
-import type { Banner, ApiResponse } from '../types/Banner';
+import type { Banner, ApiResponse } from '@/types/Banner';
 
 export const bannerService = {
   getAll() {

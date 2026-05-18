@@ -1,5 +1,5 @@
-import instance from '../config/axios';
-import type { Theater } from '../types/Theater';
+import instance from '@/config/axios';
+import type { Theater } from '@/types/Theater';
 
 function toTheater(t: any): Theater {
   return {

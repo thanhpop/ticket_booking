@@ -1,5 +1,5 @@
-import instance from "../config/axios";
-import type { Article } from "../types/Article";
+import instance from "@/config/axios";
+import type { Article } from "@/types/Article";
 
 interface ApiResponse<T> {
   code: number;

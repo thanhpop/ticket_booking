@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Layout, Menu } from "antd";
+import { Button, Layout, Menu } from "antd";
 import type { MenuProps } from "antd";
 import {
   VideoCameraOutlined,
@@ -12,13 +12,22 @@ import {
   ReadOutlined,
   AreaChartOutlined,
 } from "@ant-design/icons";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/logo-cinema2.png";
+import { useAuth } from "@/context/AuthContext";
 
 const { Header, Sider, Content } = Layout;
 
 const AdminLayout: React.FC = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
   const items: MenuProps["items"] = useMemo(
     () => [
       {
@@ -99,9 +108,6 @@ const AdminLayout: React.FC = () => {
           <span style={{ fontSize: 16, fontWeight: "bold", color: "#fff" }}>
             Xin chào, Admin
           </span>
-          <span style={{ cursor: "pointer", color: "#fff", fontSize: 22 }}>
-            <LogoutOutlined style={{ fontSize: 20, cursor: "pointer" }} />
-          </span>
         </div>
       </Header>
 
@@ -115,12 +121,43 @@ const AdminLayout: React.FC = () => {
           overflow: "auto",
         }}
       >
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[String(selected)]}
-          items={items}
-        />
+        <div
+          style={{ display: "flex", flexDirection: "column", height: "100%" }}
+        >
+          <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+            <Menu
+              theme="dark"
+              mode="inline"
+              selectedKeys={[String(selected)]}
+              items={items}
+              style={{ fontSize: "16px", fontWeight: "500", padding: "8px 0" }}
+            />
+          </div>
+
+          <div
+            style={{
+              padding: "16px",
+              borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+            }}
+          >
+            <Button
+              type="primary"
+              danger
+              block
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "16px",
+                fontWeight: "500",
+              }}
+            >
+              Đăng xuất
+            </Button>
+          </div>
+        </div>
       </Sider>
 
       <Layout style={{ marginLeft: siderWidth, marginTop: headerHeight }}>

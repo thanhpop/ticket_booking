@@ -1,9 +1,9 @@
-import instance from "../config/axios";
+import instance from "@/config/axios";
 import type {
   LoginPayload,
   RegisterPayload,
   AuthResponse,
-} from "../types/Auth";
+} from "@/types/Auth";
 
 function toAuthResponse(d: any): AuthResponse {
   return {

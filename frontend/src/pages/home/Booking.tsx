@@ -22,16 +22,16 @@ import {
   ClockCircleOutlined,
 } from "@ant-design/icons";
 
-import { showtimeService } from "../../services/showtimeService";
-import movieService from "../../services/movieService";
-import theaterService from "../../services/theaterService";
+import { showtimeService } from "@/services/showtimeService";
+import movieService from "@/services/movieService";
+import theaterService from "@/services/theaterService";
 
-import { reservationService } from "../../services/reservationService";
-import { paymentService } from "../../services/paymentService";
-import { seatSessionService } from "../../services/seatSessionService";
-import { seatService } from "../../services/seatService";
-import type { Seat } from "../../types/Seat";
-import { createSeatStream } from "../../services/seatStreamService";
+import { reservationService } from "@/services/reservationService";
+import { paymentService } from "@/services/paymentService";
+import { seatSessionService } from "@/services/seatSessionService";
+import { seatService } from "@/services/seatService";
+import type { Seat } from "@/types/Seat";
+import { createSeatStream } from "@/services/seatStreamService";
 
 const { Content } = Layout;
 const { Text, Title } = Typography;

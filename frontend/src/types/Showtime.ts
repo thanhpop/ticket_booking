@@ -1,4 +1,3 @@
-// src/types/Showtime.ts
 
 export interface Seat {
   id: number;

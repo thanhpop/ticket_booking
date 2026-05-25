@@ -13,8 +13,6 @@
 
 **A complete platform for managing and booking movie theater tickets online with realtime updates**
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Setup](#-setup--installation) • [API](#-api-documentation) • [Support](#-support--contact)
-
 </div>
 
 ---
@@ -26,7 +24,6 @@
 - [📁 Project Structure](#-project-structure)
 - [🚀 Setup &amp; Installation](#-setup--installation)
 - [▶️ Running the Application](#-running-the-application)
-- [🐳 Docker &amp; Deployment](#-docker--deployment)
 - [📚 API Documentation](#-api-documentation)
 - [🎯 Advanced Features](#-advanced-features)
 - [🐛 Troubleshooting](#-troubleshooting)

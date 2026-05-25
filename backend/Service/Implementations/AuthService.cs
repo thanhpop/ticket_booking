@@ -139,17 +139,22 @@ namespace backend.Service.Implementations
 
         private (string token, DateTime expires) CreateJwtToken(User user)
         {
-            var jwtSection = _config.GetSection("Jwt");
-            if (!jwtSection.Exists())
-                throw new InvalidOperationException("Configuration section 'Jwt' is missing.");
 
-            var secret = jwtSection.GetValue<string>("Key");
-            var issuer = jwtSection.GetValue<string>("Issuer");
-            var audience = jwtSection.GetValue<string>("Audience");
-            var expireMinutes = jwtSection.GetValue<int?>("ExpireMinutes") ?? 60;
+            var secret = Environment.GetEnvironmentVariable("JWT_KEY")
+                 ?? _config["Jwt:Key"];
+
+            var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+                         ?? _config["Jwt:Issuer"];
+
+            var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+                           ?? _config["Jwt:Audience"];
+            var expireString = Environment.GetEnvironmentVariable("JWT_EXPIRE_MINUTES");
+
+            // Chuyển sang số để dùng trong AddMinutes()
+            int expireMinutes = int.Parse(expireString ?? "60");
 
             if (string.IsNullOrWhiteSpace(secret))
-                throw new InvalidOperationException("JWT secret is not configured.");
+                throw new InvalidOperationException("JWT secret is not configured  in .env.");
 
 
             byte[] keyBytes;

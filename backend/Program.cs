@@ -1,5 +1,6 @@
 
 
+using DotNetEnv;
 using backend.Data;
 using backend.Extensions;
 using backend.Helpers;
@@ -12,19 +13,31 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.Text;
+using Microsoft.AspNetCore.HttpLogging;
+using Serilog;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-var conn = builder.Configuration.GetConnectionString("DefaultConnection");
+var conn = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(conn, ServerVersion.AutoDetect(conn)));
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var redisConn = builder.Configuration["Redis:Connection"];
+    var redisConn = Environment.GetEnvironmentVariable("REDIS_CONNECTION")
+                    ?? throw new InvalidOperationException("REDIS_CONNECTION missing in .env file");
     return ConnectionMultiplexer.Connect(redisConn);
 });
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
@@ -57,10 +70,11 @@ builder.Services.AddCors(options =>
 
 
 
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var key = jwtSection.GetValue<string>("Key") ?? throw new InvalidOperationException("Jwt:Key missing");
-var issuer = jwtSection.GetValue<string>("Issuer");
-var audience = jwtSection.GetValue<string>("Audience");
+var key = Environment.GetEnvironmentVariable("JWT_KEY")
+          ?? throw new InvalidOperationException("JWT_KEY missing in .env file");
+
+var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -88,6 +102,37 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.00} ms";
+});
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var db = services.GetRequiredService<AppDbContext>();
+
+    try
+    {
+        if (db.Database.CanConnect())
+        {
+            var connection = db.Database.GetDbConnection();
+            logger.LogInformation("Database connected successfully: {Database} @ {DataSource}", connection.Database, connection.DataSource);
+        }
+
+        db.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to connect to the Database");
+    }
+}
+
+
+
+
 
 var redis = app.Services.GetRequiredService<IConnectionMultiplexer>();
 var subscriber = redis.GetSubscriber();

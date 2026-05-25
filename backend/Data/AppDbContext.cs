@@ -46,9 +46,16 @@ namespace backend.Data
                     v => string.IsNullOrEmpty(v) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(v, new JsonSerializerOptions())!
                 );
 
+                var stringListComparer = new ValueComparer<List<string>>(
+                  (c1, c2) => c1.SequenceEqual(c2), 
+                  c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                  c => c.ToList() 
+              );
+
                 entity.Property(e => e.genres)
                       .HasConversion(converter)
-                      .HasColumnType("json");
+                      .HasColumnType("json")
+                      .Metadata.SetValueComparer(stringListComparer);
 
             });
 

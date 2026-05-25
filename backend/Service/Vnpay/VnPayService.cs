@@ -16,11 +16,15 @@ namespace backend.Service.Vnpay
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
 
             var pay = new VnPayLibrary();
-            var urlCallBack = _configuration["Vnpay:PaymentBackReturnUrl"];
+            var urlCallBack = Environment.GetEnvironmentVariable("VNPAY_RETURN_URL");
+            var tmnCode = Environment.GetEnvironmentVariable("VNPAY_TMN_CODE");
+            var hashSecret = Environment.GetEnvironmentVariable("VNPAY_HASH_SECRET");
+
+
 
             pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
             pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
-            pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"]);
+            pay.AddRequestData("vnp_TmnCode", tmnCode);
             pay.AddRequestData("vnp_Amount", ((int)model.Amount * 100).ToString());
             pay.AddRequestData("vnp_BankCode", "NCB");
             pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
@@ -39,7 +43,7 @@ namespace backend.Service.Vnpay
 
             var paymentUrl = pay.CreateRequestUrl(
                 _configuration["Vnpay:BaseUrl"],
-                _configuration["Vnpay:HashSecret"]
+                hashSecret
             );
 
             return paymentUrl;

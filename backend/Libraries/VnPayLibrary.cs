@@ -25,10 +25,10 @@ namespace backend.Libraries
             var vnPayTranId = Convert.ToInt64(vnPay.GetResponseData("vnp_TransactionNo"));
             var vnpResponseCode = vnPay.GetResponseData("vnp_ResponseCode");
             var vnpSecureHash =
-                collection.FirstOrDefault(k => k.Key == "vnp_SecureHash").Value; //hash của dữ liệu trả về
+                collection.FirstOrDefault(k => k.Key == "vnp_SecureHash").Value; 
             var orderInfo = vnPay.GetResponseData("vnp_OrderInfo");
             var checkSignature =
-                vnPay.ValidateSignature(vnpSecureHash, hashSecret); //check Signature
+                vnPay.ValidateSignature(vnpSecureHash, hashSecret); 
             if (!checkSignature)
                 return new PaymentResponseModel()
                 {
@@ -46,38 +46,10 @@ namespace backend.Libraries
                 VnPayResponseCode = vnpResponseCode
             };
         }
-        //public string GetIpAddress(HttpContext context)
-        //{
-        //    var ipAddress = string.Empty;
-        //    try
-        //    {
-        //        var remoteIpAddress = context.Connection.RemoteIpAddress;
-
-        //        if (remoteIpAddress != null)
-        //        {
-        //            if (remoteIpAddress.AddressFamily == AddressFamily.InterNetworkV6)
-        //            {
-        //                remoteIpAddress = Dns.GetHostEntry(remoteIpAddress).AddressList
-        //                    .FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork);
-        //            }
-
-        //            if (remoteIpAddress != null) ipAddress = remoteIpAddress.ToString();
-
-        //            return ipAddress;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ex.Message;
-        //    }
-
-        //    return "127.0.0.1";
-        //}
         public string GetIpAddress(HttpContext context)
         {
             try
             {
-                // 1) Nếu có proxy/ngrok/nginx - kiểm tra X-Forwarded-For
                 if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var headerValues))
                 {
                     var ipList = headerValues.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -88,12 +60,10 @@ namespace backend.Libraries
                     }
                 }
 
-                // 2) Fallback lấy IP từ connection
                 var remoteIp = context.Connection.RemoteIpAddress;
                 if (remoteIp == null)
                     return "127.0.0.1";
 
-                // Nếu là IPv4 mapped to IPv6 -> map về IPv4
                 if (remoteIp.IsIPv4MappedToIPv6)
                     remoteIp = remoteIp.MapToIPv4();
 
@@ -101,7 +71,6 @@ namespace backend.Libraries
             }
             catch
             {
-                // KHÔNG trả ex.Message vì sẽ phá định dạng; trả fallback an toàn
                 return "127.0.0.1";
             }
         }

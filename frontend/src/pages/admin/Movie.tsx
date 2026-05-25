@@ -1,4 +1,3 @@
-// Movie.tsx
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -46,10 +45,10 @@ import movieService from "@/services/movieService";
 const { Title } = Typography;
 const { Option } = Select;
 
-const apiKey = import.meta.env.VITE_TMDB_API_KEY ?? "";
+const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
-const apiUrl = "https://api.themoviedb.org/3";
-const imageUrl = "https://image.tmdb.org/t/p/original";
+const apiUrl = import.meta.env.VITE_TMDB_API_URL;
+const imageUrl = import.meta.env.VITE_TMDB_IMAGE_URL;
 
 const MovieSchema = z.object({
   id: z.number(),

@@ -60,6 +60,7 @@ const MovieSchema = z.object({
   releaseDate: z.string().refine((v) => !isNaN(Date.parse(v)), {
     message: "releaseDate phải là chuỗi ISO hợp lệ",
   }),
+  endDate: z.string().nullable().optional(),
   poster: z.url("Poster phải là URL hợp lệ").optional(),
   trailer: z.url("Trailer phải là URL hợp lệ").optional(),
   imdbId: z.string().optional(),
@@ -128,6 +129,7 @@ const MoviePage: React.FC = () => {
       duration: record.duration,
       language: record.language,
       releaseDate: moment(record.releaseDate, "DD/MM/YYYY"),
+      endDate: moment(record.endDate, "DD/MM/YYYY"),
       poster: record.poster,
       trailer: record.trailer ?? undefined,
       imdbId: record.imdbId ?? undefined,
@@ -145,6 +147,7 @@ const MoviePage: React.FC = () => {
       duration: record.duration,
       language: record.language,
       releaseDate: moment(record.releaseDate, "DD/MM/YYYY"),
+      endDate: moment(record.endDate, "DD/MM/YYYY"),
       poster: record.poster,
       trailer: record.trailer ?? undefined,
       imdbId: record.imdbId ?? undefined,
@@ -174,10 +177,11 @@ const MoviePage: React.FC = () => {
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
-      const release: Moment = values.releaseDate;
-      const releaseIso = release.startOf("day").toDate().toISOString();
+      const releaseIso = values.releaseDate.format("YYYY-MM-DDTHH:mm:ss");
 
-      // sanitize genres by removing any leading 'phim' prefix before saving
+      const end = values.endDate;
+      const endIso = end ? end.format("YYYY-MM-DDTHH:mm:ss") : null;
+
       const sanitizedGenres: string[] = (values.genres || []).map((g: any) =>
         normalizeGenre(String(g)),
       );
@@ -189,6 +193,7 @@ const MoviePage: React.FC = () => {
         duration: values.duration,
         language: values.language,
         releaseDate: releaseIso,
+        endDate: endIso,
         poster: values.poster || undefined,
         trailer: values.trailer || undefined,
         imdbId: values.imdbId || undefined,
@@ -329,6 +334,7 @@ const MoviePage: React.FC = () => {
         releaseDate: releaseDateStr
           ? moment(releaseDateStr, "YYYY-MM-DD")
           : undefined,
+        endDate: undefined,
         imdbId: imdbFromTmdb,
         filmId: filmIdFromTmdb,
         trailer: trailerUrl,
@@ -390,6 +396,11 @@ const MoviePage: React.FC = () => {
     { title: "Thời lượng (phút)", dataIndex: "duration", key: "duration" },
     { title: "Ngôn ngữ", dataIndex: "language", key: "language" },
     { title: "Ngày khởi chiếu", dataIndex: "releaseDate", key: "releaseDate" },
+    {
+      title: "Kết thúc",
+      dataIndex: "endDate",
+      key: "endDate",
+    },
     {
       title: "Hành động",
       key: "action",
@@ -575,22 +586,47 @@ const MoviePage: React.FC = () => {
                 />
               </Form.Item>
 
-              <Form.Item
-                label="Ngày khởi chiếu"
-                name="releaseDate"
-                rules={[
-                  { required: true, message: "Vui lòng nhập ngày khởi chiếu" },
-                ]}
-              >
-                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
-              </Form.Item>
-              <Form.Item label="IMDB ID" name="imdbId">
-                <Input placeholder="" />
-              </Form.Item>
-
-              <Form.Item label="Film ID" name="filmId">
-                <Input placeholder="" />
-              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Ngày khởi chiếu"
+                    name="releaseDate"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn ngày khởi chiếu",
+                      },
+                    ]}
+                  >
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      format="DD/MM/YYYY"
+                      placeholder="Chọn ngày"
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="Ngày kết thúc" name="endDate">
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      format="DD/MM/YYYY"
+                      placeholder="Không bắt buộc"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item label="IMDB ID" name="imdbId">
+                    <Input placeholder="Ví dụ: tt15398776" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="TMDB Film ID" name="filmId">
+                    <Input placeholder="Ví dụ: 872585" />
+                  </Form.Item>
+                </Col>
+              </Row>
               <Form.Item
                 label="Trailer (YouTube URL)"
                 name="trailer"
@@ -714,18 +750,55 @@ const MoviePage: React.FC = () => {
                   })()}
                 />
               </Form.Item>
-              <Form.Item label="IMDB ID">
-                <Input
-                  readOnly
-                  value={viewForm.getFieldValue("imdbId") || ""}
-                />
-              </Form.Item>
-              <Form.Item label="Film ID">
-                <Input
-                  readOnly
-                  value={viewForm.getFieldValue("filmId") || ""}
-                />
-              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item label="Ngày khởi chiếu">
+                    <Input
+                      readOnly
+                      value={(() => {
+                        const rd = viewForm.getFieldValue("releaseDate");
+                        if (!rd) return "";
+                        return moment.isMoment(rd)
+                          ? rd.format("DD/MM/YYYY")
+                          : moment(rd).format("DD/MM/YYYY");
+                      })()}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="Ngày kết thúc">
+                    <Input
+                      readOnly
+                      placeholder="Chưa xác định"
+                      value={(() => {
+                        const ed = viewForm.getFieldValue("endDate");
+                        if (!ed) return "";
+                        return moment.isMoment(ed)
+                          ? ed.format("DD/MM/YYYY")
+                          : moment(ed).format("DD/MM/YYYY");
+                      })()}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item label="IMDB ID">
+                    <Input
+                      readOnly
+                      value={viewForm.getFieldValue("imdbId") || "N/A"}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="Film ID">
+                    <Input
+                      readOnly
+                      value={viewForm.getFieldValue("filmId") || "N/A"}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
               <Form.Item label="Trailer">
                 <Input
                   readOnly

@@ -30,7 +30,10 @@ namespace backend.Model
         [Column("release_date")]
         public DateTime releaseDate { get; set; }
 
+        [Column("end_date")]
+        public DateTime? endDate { get; set; }
         [Required]
+
         [Column("imdb_id")]
         public required string imdbId { get; set; }
         [Required]

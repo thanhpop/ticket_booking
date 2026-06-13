@@ -166,15 +166,21 @@ namespace backend.Services.Implementations
 
         public async Task<IEnumerable<ShowtimeDto>> GetAvailableShowtimesAsync(DateTime? fromDate = null)
         {
-            var startDate = (fromDate ?? DateTime.Today).Date;
-            var endDate = startDate.AddDays(7);
+            var now = DateTime.Now;
+            var today = now.Date;
+
+            var cutoffTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(15));
+
+            var startDate = (fromDate ?? today).Date;
+            var endDate = startDate.AddDays(6);
 
             var list = await _db.Showtimes
                 .AsNoTracking()
                 .Where(s =>
-                    s.ShowDate >= startDate &&
-                    s.ShowDate <= endDate &&
-                    s.AvailableSeats > 0
+                        s.AvailableSeats > 0 &&
+                        s.ShowDate >= startDate &&
+                        s.ShowDate <= endDate &&
+                        (s.ShowDate > today || (s.ShowDate == today && s.ShowTime > cutoffTime))
                 )
                 .OrderBy(s => s.ShowDate)
                 .ThenBy(s => s.ShowTime)

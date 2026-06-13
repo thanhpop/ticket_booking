@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Typography, Tag, Spin, Button, Divider } from "antd";
 import { ArrowLeftOutlined, CalendarOutlined } from "@ant-design/icons";
-import AppHeader from "@/components/AppHeader";
-import AppFooter from "@/components/AppFooter";
 import { articleService } from "@/services/ArticleService";
 import type { Article } from "@/types/Article";
 
@@ -36,11 +34,9 @@ export default function ArticleDetailPage() {
   if (loading || !article) {
     return (
       <Layout className="min-h-screen">
-        <AppHeader />
         <div className="flex justify-center items-center h-[60vh]">
           <Spin size="large" />
         </div>
-        <AppFooter />
       </Layout>
     );
   }

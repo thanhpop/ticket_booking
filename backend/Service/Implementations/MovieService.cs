@@ -47,6 +47,7 @@ namespace backend.Services.Implementations
             existing.duration = dto.Duration;
             existing.language = dto.Language;
             existing.releaseDate = dto.ReleaseDate;
+            existing.endDate = dto.EndDate;
             existing.imdbId = dto.ImdbId;
             existing.filmId = dto.FilmId;
             existing.trailer = dto.Trailer;
@@ -76,6 +77,7 @@ namespace backend.Services.Implementations
                 Duration = m.duration,
                 Language = m.language,
                 ReleaseDate = m.releaseDate,
+                EndDate = m.endDate,
                 ImdbId = m.imdbId,
                 FilmId = m.filmId,
                 Trailer = m.trailer
@@ -93,6 +95,7 @@ namespace backend.Services.Implementations
                 duration = dto.Duration,
                 language = dto.Language,
                 releaseDate = dto.ReleaseDate,
+                endDate = dto.EndDate,
                 imdbId = dto.ImdbId,
                 filmId = dto.FilmId,
                 trailer = dto.Trailer

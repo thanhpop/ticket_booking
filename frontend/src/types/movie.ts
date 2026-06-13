@@ -7,6 +7,7 @@ export interface Movie {
     language?: string;
     releaseDate?: string;
     poster?: string;
+    endDate?: string;
     imdbId?: string;
     filmId?: string;
     trailer?: string;

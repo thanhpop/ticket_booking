@@ -1,6 +1,5 @@
 
 
-using DotNetEnv;
 using backend.Data;
 using backend.Extensions;
 using backend.Helpers;
@@ -8,13 +7,15 @@ using backend.Middleware;
 using backend.Service.Implementations;
 using backend.Service.Interfaces;
 using backend.Service.Vnpay;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Serilog.Events;
 using StackExchange.Redis;
 using System.Text;
-using Microsoft.AspNetCore.HttpLogging;
-using Serilog;
 
 Env.Load();
 
@@ -33,6 +34,9 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 });
 
 Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
@@ -116,13 +120,12 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        if (db.Database.CanConnect())
-        {
-            var connection = db.Database.GetDbConnection();
-            logger.LogInformation("Database connected successfully: {Database} @ {DataSource}", connection.Database, connection.DataSource);
-        }
 
-        db.Database.EnsureCreated();
+         db.Database.EnsureCreated();
+         var connection = db.Database.GetDbConnection();
+         logger.LogInformation("Database connected successfully: {Database} @ {DataSource}", connection.Database, connection.DataSource);
+
+        
     }
     catch (Exception ex)
     {
@@ -152,11 +155,6 @@ subscriber.Subscribe("seat-updated", async (channel, message) =>
 
 app.UseExceptionHandler();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
-}
 
 if (app.Environment.IsDevelopment())
 {

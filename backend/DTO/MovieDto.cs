@@ -26,6 +26,8 @@ namespace backend.DTO
         [DataType(DataType.Date)]
         public DateTime ReleaseDate { get; set; }
 
+        public DateTime? EndDate { get; set; }
+
         [Required(ErrorMessage = "IMDB id is required.")]
         public string ImdbId { get; set; } = null!;
 

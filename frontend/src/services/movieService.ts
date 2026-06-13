@@ -8,6 +8,27 @@ function normalizeGenres(m: any): string[] {
     return [];
 }
 
+function formatDateToUI(rawDate: any): string | undefined {
+    if (!rawDate) return undefined;
+    const mm = moment(rawDate);
+    if (mm.isValid()) return mm.format('DD/MM/YYYY');
+    return String(rawDate);
+}
+
+function formatDateForApi(dateStr?: string | null): string | null {
+    if (!dateStr) return null; // Quan trọng: Trả về null để backend biết là xóa ngày
+    const formats = [
+        'DD/MM/YYYY', 'DD-MM-YYYY',
+        'YYYY-MM-DD', 'YYYY/MM/DD',
+        'MM/DD/YYYY', 'MM-DD-YYYY',
+    ];
+    let mm = moment(dateStr, formats, true);
+    if (mm.isValid()) return mm.format('YYYY-MM-DD');
+    mm = moment(dateStr);
+    if (mm.isValid()) return mm.format('YYYY-MM-DD');
+    return dateStr;
+}
+
 function toMovie(m: any): Movie {
     let rawDate = m.release_date ?? m.releaseDate ?? m.release;
     let formattedDate: string | undefined;
@@ -25,26 +46,15 @@ function toMovie(m: any): Movie {
         genres: normalizeGenres(m),
         duration: typeof m.duration === 'number' ? m.duration : (Number(m.duration) || 0),
         language: m.language ?? m.originalLanguage ?? m.original_language,
-        releaseDate: formattedDate,
+        releaseDate: formatDateToUI(m.release_date ?? m.releaseDate ?? m.release),
+        endDate: formatDateToUI(m.endDate ?? m.end_date),
         poster: m.poster ?? m.poster_path,
         imdbId: imdbId ?? undefined,
         filmId: filmId ?? undefined,
         trailer: m.trailer ?? undefined,
     };
 }
-function formatReleaseForApi(release?: string): string | undefined {
-    if (!release) return undefined;
-    const formats = [
-        'DD/MM/YYYY', 'DD-MM-YYYY',
-        'YYYY-MM-DD', 'YYYY/MM/DD',
-        'MM/DD/YYYY', 'MM-DD-YYYY',
-    ];
-    let mm = moment(release, formats, true);
-    if (mm.isValid()) return mm.format('YYYY-MM-DD');
-    mm = moment(release);
-    if (mm.isValid()) return mm.format('YYYY-MM-DD');
-    return release;
-}
+
 
 export const movieService = {
     
@@ -60,16 +70,23 @@ export const movieService = {
     },
 
     async createMovie(payload: Omit<Movie, 'id'>): Promise<Movie> {
-        const formatted = formatReleaseForApi(payload.releaseDate);
-        const body = { ...payload, releaseDate: formatted ?? payload.releaseDate };
+        const body = { 
+            ...payload, 
+            releaseDate: formatDateForApi(payload.releaseDate) ?? payload.releaseDate,
+            endDate: formatDateForApi(payload.endDate)
+        };
         const res = await instance.post('/movie', body);
         const movie = res.data.data ;
         return toMovie(movie);
     },
 
     async updateMovie(id: number, payload: Omit<Movie, 'id'>): Promise<Movie> {
-        const formatted = formatReleaseForApi(payload.releaseDate);
-        const body = { ...payload, id: Number(id), releaseDate: formatted ?? payload.releaseDate };
+        const body = { 
+            ...payload, 
+            id: Number(id), 
+            releaseDate: formatDateForApi(payload.releaseDate) ?? payload.releaseDate,
+            endDate: formatDateForApi(payload.endDate)
+        };
         const res = await instance.put(`/movie/${encodeURIComponent(String(id))}`, body);
         const movie = res.data.data;
         return toMovie(movie);

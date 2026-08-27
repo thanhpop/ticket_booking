@@ -26,7 +26,6 @@
 - [▶️ Running the Application](#-running-the-application)
 - [📚 API Documentation](#-api-documentation)
 - [🎯 Advanced Features](#-advanced-features)
-- [🐛 Troubleshooting](#-troubleshooting)
 - [👥 Contributors](#-contributors)
 
 ---
@@ -88,7 +87,6 @@
 | Swagger/OpenAPI       | Latest  | API Documentation |
 | StackExchange.Redis   | Latest  | Redis Client      |
 | BCrypt.NET-Next       | -       | Password Hashing  |
-| AutoMapper            | -       | Object Mapping    |
 
 ### ⚛️ Frontend Stack
 
@@ -121,40 +119,14 @@
 Ticket-Booking/
 ├── backend/                          # ASP.NET Core Web API
 │   ├── Program.cs                   # Entry point & Configuration
-│   ├── appsettings.json             # Default Configuration
-│   ├── appsettings.Development.json # Development Configuration
-│   ├── backend.csproj               # Project File
-│   ├── Dockerfile                   # Docker Image Definition
 │   │
 │   ├── Controller/                  # API Endpoints
-│   │   ├── AuthController.cs        # Authentication & Authorization
-│   │   ├── MovieController.cs       # Movie Management
-│   │   ├── TheaterController.cs     # Theater Management
-│   │   ├── ShowtimesController.cs   # Showtime Management
-│   │   ├── SeatsController.cs       # Seat Management
-│   │   ├── ReservationController.cs # Reservation Operations
-│   │   ├── PaymentController.cs     # Payment Processing
-│   │   └── ... (other controllers)
 │   │
 │   ├── Model/                       # Entity Models
-│   │   ├── User.cs
-│   │   ├── Movie.cs
-│   │   ├── Theater.cs
-│   │   ├── Showtime.cs
-│   │   ├── Seat.cs
-│   │   ├── SeatSession.cs
-│   │   ├── Reservation.cs
-│   │   └── ... (other models)
 │   │
 │   ├── DTO/                         # Data Transfer Objects
-│   │   ├── LoginDto.cs
-│   │   ├── RegisterDto.cs
-│   │   ├── MovieDto.cs
-│   │   └── ... (other DTOs)
 │   │
 │   ├── Data/                        # Database Context
-│   │   ├── AppDbContext.cs          # EF Core DbContext
-│   │   └── Schema.sql               # Database Schema
 │   │
 │   ├── Service/                     # Business Logic Layer
 │   │   ├── Interfaces/              # Service Interfaces
@@ -162,16 +134,12 @@ Ticket-Booking/
 │   │   └── Vnpay/                   # VNPAY Integration
 │   │
 │   ├── Middleware/
-│   │   └── GlobalExceptionHandler.cs
 │   │
 │   ├── Extensions/
-│   │   └── ServiceCollectionExtensions.cs
 │   │
 │   ├── Helpers/
-│   │   └── ApiResponse.cs
 │   │
 │   └── Properties/
-│       └── launchSettings.json
 │
 ├── frontend/                        # React + Vite Application
 │   ├── src/
@@ -192,7 +160,6 @@ Ticket-Booking/
 │   ├── vite.config.ts               # Vite Configuration
 │   ├── tsconfig.json                # TypeScript Configuration
 │   └── eslint.config.js             # ESLint Rules
-│
 ├── mysql-init/
 │   └── Schema.sql                   # Database Initialization Script
 │
@@ -201,7 +168,6 @@ Ticket-Booking/
 ├── Ticket-Booking.sln               # Visual Studio Solution
 ├── launchSettings.json              # Launch Profiles
 └── README.md                        # This File
-
 ```
 
 ---
@@ -294,16 +260,16 @@ redis-server
 
 ### 🔐 Authentication
 
-| Method | Endpoint             | Description       |
-| ------ | -------------------- | ----------------- |
+| Method | Endpoint               | Description       |
+| ------ | ---------------------- | ----------------- |
 | POST   | `/api/auth/register` | User Registration |
 | POST   | `/api/auth/login`    | User Login        |
 | POST   | `/api/auth/refresh`  | Refresh Token     |
 
 ### 🎬 Movies
 
-| Method | Endpoint          | Description          |
-| ------ | ----------------- | -------------------- |
+| Method | Endpoint            | Description          |
+| ------ | ------------------- | -------------------- |
 | GET    | `/api/movie`      | Get All Movies       |
 | GET    | `/api/movie/{id}` | Get Movie Details    |
 | POST   | `/api/movie`      | Create Movie (Admin) |
@@ -312,8 +278,8 @@ redis-server
 
 ### 🎪 Showtimes
 
-| Method | Endpoint              | Description             |
-| ------ | --------------------- | ----------------------- |
+| Method | Endpoint                | Description             |
+| ------ | ----------------------- | ----------------------- |
 | GET    | `/api/showtimes`      | Get All Showtimes       |
 | GET    | `/api/showtimes/{id}` | Get Showtime Details    |
 | POST   | `/api/showtimes`      | Create Showtime (Admin) |
@@ -321,15 +287,15 @@ redis-server
 
 ### 🪑 Seats
 
-| Method | Endpoint                        | Description              |
-| ------ | ------------------------------- | ------------------------ |
+| Method | Endpoint                          | Description              |
+| ------ | --------------------------------- | ------------------------ |
 | GET    | `/api/seats/{showtimeId}`       | Get Seats by Showtime    |
 | GET    | `/api/seatsession/{showtimeId}` | Get Realtime Seat Status |
 
 ### 🎫 Reservations
 
-| Method | Endpoint                | Description           |
-| ------ | ----------------------- | --------------------- |
+| Method | Endpoint                  | Description           |
+| ------ | ------------------------- | --------------------- |
 | POST   | `/api/reservation`      | Create Reservation    |
 | GET    | `/api/reservation`      | Get User Reservations |
 | PUT    | `/api/reservation/{id}` | Update Reservation    |
@@ -337,15 +303,15 @@ redis-server
 
 ### 💳 Payments
 
-| Method | Endpoint                      | Description        |
-| ------ | ----------------------------- | ------------------ |
+| Method | Endpoint                        | Description        |
+| ------ | ------------------------------- | ------------------ |
 | POST   | `/api/vnpay/createpaymenturl` | Create Payment URL |
 | GET    | `/api/vnpay/callback`         | Payment Callback   |
 
 ### 📊 Dashboard & Reports
 
-| Method | Endpoint         | Description         |
-| ------ | ---------------- | ------------------- |
+| Method | Endpoint           | Description         |
+| ------ | ------------------ | ------------------- |
 | GET    | `/api/dashboard` | Get Dashboard Stats |
 | GET    | `/api/report`    | Get Sales Report    |
 
@@ -422,41 +388,6 @@ policy.WithOrigins(
 ```
 
 ---
-
-## 🐛 Troubleshooting
-
-### ❌ MySQL Connection Error
-
-```bash
-# Check MySQL Service
-mysql -u root -p -e "SELECT 1"
-
-# Verify Connection String Format
-# Server=localhost;Port=3306;Database=ticket_db;User=root;Password=xxx;
-```
-
-### ❌ Redis Connection Error
-
-```bash
-# Test Redis Connection
-redis-cli ping
-# Expected Output: PONG
-
-# Start Redis if Needed
-redis-server
-```
-
-### ❌ Frontend CORS Error
-
-- Check CORS Policy in `Program.cs`
-- Verify Backend URL in Frontend Config
-- Check Network Tab in Browser DevTools (F12)
-
-### ❌ JWT Token Expired
-
-- Default Expiration: 20 Minutes
-- Use Refresh Token Endpoint to Get New Token
-- Update `ExpireMinutes` in `appsettings.json` to Change Duration
 
 ## 📝 Development Guidelines
 

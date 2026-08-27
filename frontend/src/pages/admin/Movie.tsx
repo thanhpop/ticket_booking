@@ -27,7 +27,6 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import moment from "moment";
-import type { Moment } from "moment";
 import axios from "axios";
 import { z } from "zod";
 import type { Movie, ApiMovie } from "@/types/Movie";

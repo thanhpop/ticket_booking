@@ -20,8 +20,8 @@ import BannerPage from "@/pages/admin/Banner.tsx";
 import NewsManagementPage from "@/pages/admin/Article";
 import ArticleDetailPage from "@/pages/home/ArticleDetailPage";
 import AdminDashboard from "@/pages/admin/Dashboard.tsx";
-import MainLayout from "@/layouts/MainLayout";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import MainLayout from "@/layouts/UserLayout";
+import ProtectedRoute from "@/routes/ProtectedRoute";
 
 const AppRoutes: React.FC = () => {
   return (
